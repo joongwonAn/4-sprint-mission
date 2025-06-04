@@ -1,8 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
-import com.sprint.mission.discodeit.service.ChannelService;
 
-import java.util.UUID;
 
 public class Message extends BaseEntity {
     private User sender;
@@ -20,6 +18,14 @@ public class Message extends BaseEntity {
     // setter && getter
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void setSender(User sender) {
+        this.sender = sender;
+    }
+
+    public void setChannel(Channel channel) {
+        this.channel = channel;
     }
 
     public User getSender() {

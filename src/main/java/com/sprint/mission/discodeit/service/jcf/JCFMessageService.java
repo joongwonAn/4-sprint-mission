@@ -10,18 +10,22 @@ import java.util.List;
 import java.util.UUID;
 
 public class JCFMessageService implements MessageService {
-    private final List<Message> messageList = new ArrayList<>();
+    private final List<Message> data = new ArrayList<>();
 
     @Override
     public Message sendMessage(User sender, Channel channel, String content) {
         Message message = new Message(sender, channel, content);
-        messageList.add(message);
+        data.add(message);
+        message.setSender(sender);
+        message.setChannel(channel);
+        sender.getMessages().add(message);
+        channel.getMessages().add(message);
         return message;
     }
 
     @Override
     public Message findMessage(UUID id) {
-        for (Message message : messageList) {
+        for (Message message : data) {
             if (message.getId().equals(id)) {
                 return message;
             }
@@ -31,12 +35,12 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public List<Message> findAllMessages() {
-        return new ArrayList<>(messageList);
+        return new ArrayList<>(data);
     }
 
     @Override
     public Message updateMessage(UUID id, String newContent) {
-        for (Message message : messageList) {
+        for (Message message : data) {
             if (message.getId().equals(id)) {
                 message.setContent(newContent);
                 message.setUpdatedAt();
@@ -48,9 +52,9 @@ public class JCFMessageService implements MessageService {
 
     @Override
     public Message deleteMessage(UUID id) {
-        for (Message message : messageList) {
+        for (Message message : data) {
             if (message.getId().equals(id)) {
-                messageList.remove(message);
+                data.remove(message);
                 return message;
             }
         }

@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.entity;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -8,24 +8,24 @@ import java.util.List;
 import java.util.UUID;
 
 public class JCFUserService implements UserService {
-    private final List<User> userList;
+    private final List<User> data;
 
     public JCFUserService() {
-        userList = new ArrayList<>();
+        data = new ArrayList<>();
     }
 
     // 등록
     @Override
     public User createUser(String name) {
         User createUser = new User(name);
-        userList.add(createUser);
+        data.add(createUser);
         return createUser;
     }
 
     // 단건 조회
     @Override
     public User findUserById(UUID id) {
-        for (User user : userList) {
+        for (User user : data) {
             if (user.getId().equals(id)) {
                 return user;
             }
@@ -36,13 +36,13 @@ public class JCFUserService implements UserService {
     // 다건 조회
     @Override
     public List<User> findAllUsers() {
-        return new ArrayList<>(userList);
+        return new ArrayList<>(data);
     }
 
     // 수정
     @Override
     public User updateUserById(UUID id, String newName) {
-        for (User user : userList) {
+        for (User user : data) {
             if (user.getId().equals(id)) {
                 user.setUsername(newName);
                 user.setUpdatedAt();
@@ -55,9 +55,9 @@ public class JCFUserService implements UserService {
     // 삭제
     @Override
     public User deleteUserById(UUID id) {
-        for (User user : userList) {
+        for (User user : data) {
             if (user.getId().equals(id)) {
-                userList.remove(user);
+                data.remove(user);
                 return user;
             }
         }
