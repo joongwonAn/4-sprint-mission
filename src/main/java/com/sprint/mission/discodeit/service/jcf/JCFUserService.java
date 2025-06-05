@@ -1,11 +1,13 @@
 package com.sprint.mission.discodeit.service.jcf;
 
+import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class JCFUserService implements UserService {
     private final List<User> data;
@@ -23,15 +25,17 @@ public class JCFUserService implements UserService {
     }
 
     // 단건 조회
-    @Override
-    public User findUserById(UUID id) {
-        for (User user : data) {
-            if (user.getId().equals(id)) {
-                return user;
-            }
-        }
-        return null;
-    }
+//    @Override
+//    public User findUserById(UUID id) {
+//        for (User user : data) {
+//            if (user.getId().equals(id)) {
+//                return user;
+//            }
+//        }
+//        return null;
+//    }
+    // Stream 변환
+
 
     // 다건 조회
     @Override
@@ -57,6 +61,9 @@ public class JCFUserService implements UserService {
     public User deleteUserById(UUID id) {
         for (User user : data) {
             if (user.getId().equals(id)) {
+                for (Channel channel : user.getChannels()) {
+                    channel.getMembers().remove(user);
+                }
                 data.remove(user);
                 return user;
             }

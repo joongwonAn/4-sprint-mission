@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 
 import java.util.ArrayList;
@@ -48,6 +49,9 @@ public class JCFChannelService implements ChannelService {
     public Channel deleteChannelById(UUID id) {
         for (Channel channel : data) {
             if (channel.getId().equals(id)) {
+                for (User member : channel.getMembers()) {
+                    member.getChannels().remove(channel);
+                }
                 data.remove(channel);
                 return channel;
             }

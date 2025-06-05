@@ -16,8 +16,10 @@ public class JCFMessageService implements MessageService {
     public Message sendMessage(User sender, Channel channel, String content) {
         Message message = new Message(sender, channel, content);
         data.add(message);
+        // 관계 설정
         message.setSender(sender);
         message.setChannel(channel);
+        // 양방향 관계
         sender.getMessages().add(message);
         channel.getMessages().add(message);
         return message;
@@ -55,6 +57,12 @@ public class JCFMessageService implements MessageService {
         for (Message message : data) {
             if (message.getId().equals(id)) {
                 data.remove(message);
+
+                // 양방향 해제
+                User sender = message.getSender();
+                Channel channel = message.getChannel();
+                sender.getMessages().remove(message);
+                channel.getMessages().remove(message);
                 return message;
             }
         }
