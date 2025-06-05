@@ -39,8 +39,8 @@ public class JCFUserService implements UserService {
     public User findUserById(UUID id) {
         return data.stream()
                 .filter(user -> user.getId().equals(id))
-                .collect(Collectors.toList())
-                .get(0);
+                .findFirst()
+                .orElse(null);
     }
 
     // 다건 조회
@@ -50,7 +50,7 @@ public class JCFUserService implements UserService {
     }
 
     // 수정
-    @Override
+/*    @Override
     public User updateUserById(UUID id, String newName) {
         for (User user : data) {
             if (user.getId().equals(id)) {
@@ -60,10 +60,23 @@ public class JCFUserService implements UserService {
             }
         }
         return null;
+    }*/
+    // Stream 변환
+    @Override
+    public User updateUserById(UUID id, String newName) {
+        return data.stream()
+                .filter(user -> user.getId().equals(id))
+                .map(user -> {
+                    user.setUsername(newName);
+                    user.setUpdatedAt();
+                    return user;
+                })
+                .findFirst()
+                .orElse(null);
     }
 
     // 삭제
-    @Override
+    /*@Override
     public User deleteUserById(UUID id) {
         for (User user : data) {
             if (user.getId().equals(id)) {
@@ -75,5 +88,20 @@ public class JCFUserService implements UserService {
             }
         }
         return null;
+    }*/
+    // Stream 변환
+    @Override
+    public User deleteUserById(UUID id) {
+        return data.stream()
+                .filter(user -> user.getId().equals(id))
+                .map(user -> {
+                    for (Channel channel : user.getChannels()) {
+                        channel.getMembers().remove(user);
+                    }
+                    data.remove(user);
+                    return user;
+                })
+                .findFirst()
+                .orElse(null);
     }
 }
