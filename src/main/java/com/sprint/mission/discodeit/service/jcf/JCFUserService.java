@@ -35,7 +35,13 @@ public class JCFUserService implements UserService {
 //        return null;
 //    }
     // Stream 변환
-
+    @Override
+    public User findUserById(UUID id) {
+        return data.stream()
+                .filter(user -> user.getId().equals(id))
+                .collect(Collectors.toList())
+                .get(0);
+    }
 
     // 다건 조회
     @Override
