@@ -62,21 +62,31 @@ public class JCFUserService implements UserService {
         return null;
     }*/
     // Stream 변환
+    /*
+     * update 로직 : 찾음 > 수정 > 반환
+     * filter > findFirst로 찾고, map으로 수정
+     * 여기서 map은 중간 연산자 아니고, Optional!!
+     *
+     * +) Stream은 내부 반복자라 전체를 내부 순회하므로 update 할 요소가 많아지면 Stream 사용 권장 X
+     */
     @Override
     public User updateUserById(UUID id, String newName) {
         return data.stream()
                 .filter(user -> user.getId().equals(id))
+                .findFirst()
                 .map(user -> {
                     user.setUsername(newName);
                     user.setUpdatedAt();
                     return user;
                 })
-                .findFirst()
                 .orElse(null);
     }
 
     // 삭제
-    /*@Override
+    /*
+     * delete는 Stream 사용 시 side effect 발생하므로 변경 X
+     */
+    @Override
     public User deleteUserById(UUID id) {
         for (User user : data) {
             if (user.getId().equals(id)) {
@@ -88,20 +98,5 @@ public class JCFUserService implements UserService {
             }
         }
         return null;
-    }*/
-    // Stream 변환
-    @Override
-    public User deleteUserById(UUID id) {
-        return data.stream()
-                .filter(user -> user.getId().equals(id))
-                .map(user -> {
-                    for (Channel channel : user.getChannels()) {
-                        channel.getMembers().remove(user);
-                    }
-                    data.remove(user);
-                    return user;
-                })
-                .findFirst()
-                .orElse(null);
     }
 }

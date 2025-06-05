@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 
@@ -11,6 +12,7 @@ import java.util.UUID;
 public class JCFChannelService implements ChannelService {
     private final List<Channel> data = new ArrayList<>();
 
+    // 등록
     @Override
     public Channel createChannel(String name) {
         Channel channel = new Channel(name);
@@ -18,7 +20,8 @@ public class JCFChannelService implements ChannelService {
         return channel;
     }
 
-    @Override
+    // 단건 조회
+    /*@Override
     public Channel findChannelById(UUID id) {
         for (Channel channel : data) {
             if (channel.getId().equals(id)) {
@@ -26,13 +29,23 @@ public class JCFChannelService implements ChannelService {
             }
         }
         return null;
+    }*/
+    // Stream 변경
+    @Override
+    public Channel findChannelById(UUID id) {
+        return data.stream()
+                .filter(channel -> channel.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
+    // 다건 조회
     @Override
     public List<Channel> findAllChannels() {
         return new ArrayList<>(data);
     }
 
+    // 수정
     @Override
     public Channel updateChannelById(UUID id, String newName) {
         for (Channel channel : data) {
@@ -45,6 +58,7 @@ public class JCFChannelService implements ChannelService {
         return null;
     }
 
+    // 삭제
     @Override
     public Channel deleteChannelById(UUID id) {
         for (Channel channel : data) {

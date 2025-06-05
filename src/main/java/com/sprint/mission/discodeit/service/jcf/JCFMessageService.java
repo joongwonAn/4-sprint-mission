@@ -12,6 +12,7 @@ import java.util.UUID;
 public class JCFMessageService implements MessageService {
     private final List<Message> data = new ArrayList<>();
 
+    // 등록
     @Override
     public Message sendMessage(User sender, Channel channel, String content) {
         Message message = new Message(sender, channel, content);
@@ -25,7 +26,8 @@ public class JCFMessageService implements MessageService {
         return message;
     }
 
-    @Override
+    // 단건 조회
+    /*@Override
     public Message findMessage(UUID id) {
         for (Message message : data) {
             if (message.getId().equals(id)) {
@@ -33,13 +35,22 @@ public class JCFMessageService implements MessageService {
             }
         }
         return null;
+    }*/
+    // Stream 변경
+    @Override
+    public Message findMessage(UUID id) {
+        return data.stream()
+                .filter(message -> message.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
-
+    // 다건 조회
     @Override
     public List<Message> findAllMessages() {
         return new ArrayList<>(data);
     }
 
+    // 수정
     @Override
     public Message updateMessage(UUID id, String newContent) {
         for (Message message : data) {
@@ -52,6 +63,7 @@ public class JCFMessageService implements MessageService {
         return null;
     }
 
+    // 삭제
     @Override
     public Message deleteMessage(UUID id) {
         for (Message message : data) {
