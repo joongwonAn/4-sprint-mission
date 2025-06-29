@@ -77,8 +77,8 @@ public class JavaApplication {
         );
 
         // create TEST
-        UserStatusDto createdUser1 = userService.create(userCreateDto);
-        UserStatusDto createdUser2 = userService.create(userCreateDto2);
+        UserStatusResponseDto createdUser1 = userService.create(userCreateDto);
+        UserStatusResponseDto createdUser2 = userService.create(userCreateDto2);
         UUID userId = createdUser1.getId();
         UUID userId2 = createdUser2.getId();
         System.out.println("\n[생성 완료] ID: " + userId + ", Username: " + createdUser1.getUsername());
@@ -88,12 +88,12 @@ public class JavaApplication {
 
         // login TEST
         UserLoginDto loginDto = new UserLoginDto("woody", "woody1234");
-        UserStatusDto afterLogin = authService.login(loginDto);
+        UserStatusResponseDto afterLogin = authService.login(loginDto);
         System.out.println("\n[LOGIN] updatedAt=" + afterLogin.getUpdatedAt() +
                 ", online? " + userService.isOnline(afterLogin));
 
         // find TEST
-        UserStatusDto foundUser = userService.find(userId);
+        UserStatusResponseDto foundUser = userService.find(userId);
         System.out.println("\n[find 결과]");
         System.out.println("ID: " + foundUser.getId());
         System.out.println("Username: " + foundUser.getUsername());
@@ -101,9 +101,9 @@ public class JavaApplication {
         System.out.println("ProfileImageId: " + foundUser.getProfileImageId());
 
         // findAll TEST
-        List<UserStatusDto> allUsers = userService.findAll();
+        List<UserStatusResponseDto> allUsers = userService.findAll();
         System.out.println("\n[findAll 결과]");
-        for (UserStatusDto dto : allUsers) {
+        for (UserStatusResponseDto dto : allUsers) {
             System.out.println("→ ID: " + dto.getId() + ", Username: " + dto.getUsername()
                     + ", Email: " + dto.getEmail()
                     + ", Online: " + userService.isOnline(dto));

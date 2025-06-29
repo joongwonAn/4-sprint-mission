@@ -2,7 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.BinaryContentCreateDto;
 import com.sprint.mission.discodeit.dto.UserCreateDto;
-import com.sprint.mission.discodeit.dto.UserStatusDto;
+import com.sprint.mission.discodeit.dto.UserStatusResponseDto;
 import com.sprint.mission.discodeit.dto.UserUpdateDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
@@ -32,7 +32,7 @@ public class BasicUserService implements UserService {
     private final BinaryContentMapper binaryContentMapper;
 
     @Override
-    public UserStatusDto create(UserCreateDto userCreateDto) {
+    public UserStatusResponseDto create(UserCreateDto userCreateDto) {
 
         validateUserDuplications(userCreateDto.getUsername(), userCreateDto.getEmail());
 
@@ -52,7 +52,7 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public UserStatusDto find(UUID userId) {
+    public UserStatusResponseDto find(UUID userId) {
 
         User user = getUserOrThrow(userId);
         UserStatus userStatus = getUserStatusOrThrow(userId);
@@ -61,10 +61,10 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public List<UserStatusDto> findAll() {
+    public List<UserStatusResponseDto> findAll() {
 
         List<User> users = userRepository.findAll();
-        List<UserStatusDto> userStatusDtos = new ArrayList<>();
+        List<UserStatusResponseDto> userStatusDtos = new ArrayList<>();
 
         for (User user : users) {
             UserStatus userStatus = getUserStatusOrThrow(user.getId());
@@ -115,7 +115,7 @@ public class BasicUserService implements UserService {
 
     // 유저가 현재 접속 중인지 판단 -> UserStatus의 updatedAt이 현재로부터 5분 이내면 접속 중
     @Override
-    public boolean isOnline(UserStatusDto userStatusDto) {
+    public boolean isOnline(UserStatusResponseDto userStatusDto) {
 
         Instant fiveMinutesAgo = Instant.now().minusSeconds(60 * 5);
 

@@ -9,7 +9,7 @@ import java.util.UUID;
 // 비밀번호 제외, 온라인 상태 포함
 @Getter
 @AllArgsConstructor
-public class UserStatusDto {
+public class UserStatusResponseDto {
 
     private UUID id;
     private String username;

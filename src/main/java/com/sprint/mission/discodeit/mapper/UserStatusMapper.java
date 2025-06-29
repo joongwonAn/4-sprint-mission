@@ -1,25 +1,18 @@
 package com.sprint.mission.discodeit.mapper;
 
-import com.sprint.mission.discodeit.dto.UserCreateDto;
+import com.sprint.mission.discodeit.dto.UserStatusCreateDto;
 import com.sprint.mission.discodeit.dto.UserStatusResponseDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
-import org.springframework.stereotype.Component;
 
-@Component
-public class UserMapper {
+public class UserStatusMapper {
 
-    public UserMapper() {
+    public UserStatusMapper() {}
 
-    }
+    public UserStatus toEntity(UserStatusCreateDto dto) {
 
-    public User toEntity(UserCreateDto dto) {
-
-        return new User(
-                dto.getUsername(),
-                dto.getEmail(),
-                dto.getPassword(),
-                null
+        return new UserStatus(
+                dto.getUserId()
         );
     }
 
@@ -33,5 +26,4 @@ public class UserMapper {
                 userStatus.getUpdatedAt()
         );
     }
-
 }
