@@ -1,4 +1,5 @@
 plugins {
+<<<<<<< HEAD
 	id 'java'
 	id 'org.springframework.boot' version '3.5.2'
 	id 'io.spring.dependency-management' version '1.1.7'
@@ -36,3 +37,23 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+=======
+    id 'java'
+}
+
+group = 'com.sprint.mission'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+>>>>>>> fe56ded0b57ffcf4521001ca7a956c8f5baf981f
