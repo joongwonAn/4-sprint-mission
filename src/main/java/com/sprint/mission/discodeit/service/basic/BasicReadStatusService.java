@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.data.ReadStatusDto;
 import com.sprint.mission.discodeit.dto.request.ReadStatusCreateRequest;
 import com.sprint.mission.discodeit.dto.request.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.ReadStatus;
@@ -23,7 +24,7 @@ public class BasicReadStatusService implements ReadStatusService {
     private final ChannelRepository channelRepository;
 
     @Override
-    public ReadStatus create(ReadStatusCreateRequest request) {
+    public ReadStatusDto create(ReadStatusCreateRequest request) {
         UUID userId = request.userId();
         UUID channelId = request.channelId();
 
@@ -40,7 +41,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
         Instant lastReadAt = request.lastReadAt();
         ReadStatus readStatus = new ReadStatus(userId, channelId, lastReadAt);
-        return readStatusRepository.save(readStatus);
+        return toDto(readStatusRepository.save(readStatus));
     }
 
     @Override
@@ -50,18 +51,27 @@ public class BasicReadStatusService implements ReadStatusService {
     }
 
     @Override
-    public List<ReadStatus> findAllByUserId(UUID userId) {
+    public List<ReadStatusDto> findAllByUserId(UUID userId) {
         return readStatusRepository.findAllByUserId(userId).stream()
+                .map(this::toDto)
                 .toList();
     }
 
     @Override
-    public ReadStatus update(UUID readStatusId, ReadStatusUpdateRequest request) {
+    public List<ReadStatusDto> updateByChannelId(UUID channelId, ReadStatusUpdateRequest request) {
         Instant newLastReadAt = request.newLastReadAt();
-        ReadStatus readStatus = readStatusRepository.findById(readStatusId)
-                .orElseThrow(() -> new NoSuchElementException("ReadStatus with id " + readStatusId + " not found"));
-        readStatus.update(newLastReadAt);
-        return readStatusRepository.save(readStatus);
+
+        List<ReadStatus> statuses = readStatusRepository.findAllByChannelId(channelId);
+        if (statuses.isEmpty()) {
+            throw new NoSuchElementException("ReadStatus with id " + channelId + " not found");
+        }
+
+        return statuses.stream()
+                .map(readStatus -> {
+                    readStatus.update(newLastReadAt);
+                    ReadStatus saved = readStatusRepository.save(readStatus);
+                    return toDto(saved);
+                }).toList();
     }
 
     @Override
@@ -70,5 +80,16 @@ public class BasicReadStatusService implements ReadStatusService {
             throw new NoSuchElementException("ReadStatus with id " + readStatusId + " not found");
         }
         readStatusRepository.deleteById(readStatusId);
+    }
+
+    private ReadStatusDto toDto(ReadStatus readStatus) {
+        return new ReadStatusDto(
+                readStatus.getId(),
+                readStatus.getCreatedAt(),
+                readStatus.getUpdatedAt(),
+                readStatus.getUserId(),
+                readStatus.getChannelId(),
+                readStatus.getLastReadAt()
+        );
     }
 }
