@@ -49,7 +49,7 @@ public class UserController {
 
         userService.delete(userId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     // 모든 사용자 조회
@@ -69,6 +69,6 @@ public class UserController {
 
         userStatusService.updateByUserId(userId, request);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }
