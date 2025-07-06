@@ -106,4 +106,18 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
             throw new RuntimeException(e);
         }
     }
+
+    public List<UUID> findAllIds() {
+        try (Stream<Path> paths = Files.list(DIRECTORY)) {
+            return paths
+                    .filter(path -> path.toString().endsWith(".ser"))
+                    .map(path -> {
+                        String filename = path.getFileName().toString().replace(".ser", "");
+                        return UUID.fromString(filename);
+                    })
+                    .toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

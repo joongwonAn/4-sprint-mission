@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -36,14 +37,15 @@ public class BasicBinaryContentService implements BinaryContentService {
     }
 
     @Override
-    public BinaryContent find(UUID binaryContentId) {
-        return binaryContentRepository.findById(binaryContentId)
-                .orElseThrow(() -> new NoSuchElementException("BinaryContent with id " + binaryContentId + " not found"));
+    public BinaryContentDto find(UUID binaryContentId) {
+        return toDto(binaryContentRepository.findById(binaryContentId)
+                .orElseThrow(() -> new NoSuchElementException("BinaryContent with id " + binaryContentId + " not found")));
     }
 
     @Override
-    public List<BinaryContent> findAllByIdIn(List<UUID> binaryContentIds) {
+    public List<BinaryContentDto> findAllByIdIn(List<UUID> binaryContentIds) {
         return binaryContentRepository.findAllByIdIn(binaryContentIds).stream()
+                .map(this::toDto)
                 .toList();
     }
 
@@ -53,5 +55,22 @@ public class BasicBinaryContentService implements BinaryContentService {
             throw new NoSuchElementException("BinaryContent with id " + binaryContentId + " not found");
         }
         binaryContentRepository.deleteById(binaryContentId);
+    }
+
+    @Override
+    public List<UUID> findAllIds() {
+        return binaryContentRepository.findAllIds();
+    }
+
+
+    private BinaryContentDto toDto(BinaryContent binaryContent) {
+        return new BinaryContentDto(
+                binaryContent.getId(),
+                binaryContent.getCreatedAt(),
+                binaryContent.getFileName(),
+                binaryContent.getSize(),
+                binaryContent.getContentType(),
+                binaryContent.getBytes()
+        );
     }
 }
