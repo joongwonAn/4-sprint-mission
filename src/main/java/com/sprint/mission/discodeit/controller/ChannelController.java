@@ -13,13 +13,12 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/channels")
 @AllArgsConstructor
 public class ChannelController {
     private ChannelService channelService;
 
     // 공개 채널 생성
-    @RequestMapping(value = "/public", method = RequestMethod.POST)
+    @RequestMapping(value = "/channels/public", method = RequestMethod.POST)
     public ResponseEntity<ChannelDto> createPublicChannel(@RequestBody PublicChannelCreateRequest request) {
         System.out.println("######### createPublicChannel");
         System.out.println("# request = " + request);
@@ -28,7 +27,7 @@ public class ChannelController {
     }
 
     // 비공개 채널 생성
-    @RequestMapping(value = "/private", method = RequestMethod.POST)
+    @RequestMapping(value = "/channels/private", method = RequestMethod.POST)
     public ResponseEntity<ChannelDto> createPrivateChannel(@RequestBody PrivateChannelCreateRequest request) {
         System.out.println("######### createPrivateChannel");
         System.out.println("# request = " + request);
@@ -37,7 +36,7 @@ public class ChannelController {
     }
 
     // 공개 채널 정보 수정
-    @RequestMapping(value = "/public/{channel-id}", method = RequestMethod.PATCH)
+    @RequestMapping(value = "/channels/public/{channel-id}", method = RequestMethod.PATCH)
     public ResponseEntity<ChannelDto> updatePublicChannel(@PathVariable("channel-id") UUID channelId,
                                                           @RequestBody PublicChannelUpdateRequest request) {
         System.out.println("######### updatePublicChannel");
@@ -48,7 +47,7 @@ public class ChannelController {
     }
 
     // 채널 삭제
-    @RequestMapping(value = "/{channel-id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/channels/{channel-id}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteChannel(@PathVariable("channel-id") UUID channelId) {
         System.out.println("######### deleteChannel");
         System.out.println("# channelId = " + channelId);
@@ -58,8 +57,8 @@ public class ChannelController {
         return ResponseEntity.noContent().build();
     }
 
-    // 특정 사용자가 볼 수 있는 모든 채널 목록 조회 (사용자 구독 채널)
-    @RequestMapping(value = "users/{user-id}", method = RequestMethod.GET)
+    // /
+    @RequestMapping(value = "users/{user-id}/channels", method = RequestMethod.GET)
     public ResponseEntity<List<ChannelDto>> findAllChannelsByUserId(@PathVariable("user-id") UUID userId) {
         System.out.println("######### findAllChannelsByUserId");
         System.out.println("# userId = " + userId);

@@ -32,7 +32,7 @@ public class UserController {
     // 사용자 수정
     @RequestMapping(value = "/{user-id}", method = RequestMethod.PATCH)
     public ResponseEntity<UserDto> updateUser(@PathVariable("user-id") UUID userId,
-                                              @RequestBody UserUpdateRequest request) {
+                                              @ModelAttribute UserUpdateRequest request) {
         System.out.println("######### patchUser");
         System.out.println("# userId = " + userId);
         System.out.println("# request = " + request);

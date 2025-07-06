@@ -12,24 +12,23 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/messages")
 @AllArgsConstructor
 public class MessageController {
     private final MessageService messageService;
 
     // 메시지 보내기
-    @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<MessageDto> sendMessage(@RequestBody MessageCreateRequest request) {
+    @RequestMapping(value = "/messages", method = RequestMethod.POST)
+    public ResponseEntity<MessageDto> sendMessage(@ModelAttribute MessageCreateRequest request) {
         System.out.println("######### sendMessage");
         System.out.println("# request = " + request);
 
-        return ResponseEntity.ok(messageService.create(request, List.of()));
+        return ResponseEntity.ok(messageService.create(request, request.attachments()));
     }
 
     // 메시지 수정
-    @RequestMapping(value = "/{message-id}", method = RequestMethod.PATCH)
+    @RequestMapping(value = "/messages/{message-id}", method = RequestMethod.PATCH)
     public ResponseEntity<MessageDto> updateMessage(@PathVariable("message-id") UUID messageId,
-                                                    @RequestBody MessageUpdateRequest request) {
+                                                    @ModelAttribute MessageUpdateRequest request) {
         System.out.println("######### updateMessage");
         System.out.println("# request = " + request);
 
@@ -37,7 +36,7 @@ public class MessageController {
     }
 
     // 메시지 삭제
-    @RequestMapping(value = "/{message-id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/messages/{message-id}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteMessage(@PathVariable("message-id") UUID messageId) {
         System.out.println("######### deleteMessage");
         System.out.println("# messageId = " + messageId);
