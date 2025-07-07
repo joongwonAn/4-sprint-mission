@@ -47,7 +47,7 @@ public class MessageController {
     }
 
     // 특정 채널의 메시지 목록 조회
-    @RequestMapping(value = "channels/{channel-id}/message", method = RequestMethod.GET)
+    @RequestMapping(value = "channels/{channel-id}/messages", method = RequestMethod.GET)
     public ResponseEntity<List<MessageDto>> findAllMessagesByChannelId(@PathVariable("channel-id") UUID channelId) {
         System.out.println("######### findAllMessagesByChannelId");
         System.out.println("# channelId = " + channelId);

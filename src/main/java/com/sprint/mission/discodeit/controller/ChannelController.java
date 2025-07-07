@@ -54,7 +54,7 @@ public class ChannelController {
 
         channelService.delete(channelId);
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     // /
