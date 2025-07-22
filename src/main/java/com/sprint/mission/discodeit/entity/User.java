@@ -28,10 +28,10 @@ public class User extends BaseUpdatableEntity {
   @Column(length = 60, nullable = false)
   private String password;
 
-  @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "profile_id", nullable = true)
   private BinaryContent profile;
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private UserStatus status;
 }
