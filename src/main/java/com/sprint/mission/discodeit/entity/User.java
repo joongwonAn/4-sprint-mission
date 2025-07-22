@@ -34,4 +34,12 @@ public class User extends BaseUpdatableEntity {
 
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private UserStatus status;
+
+  // 연관관계 편의 메서드
+  public void setStatus(UserStatus status) {
+    this.status = status;
+    if (status.getUser() != this) {
+      status.setUser(this);
+    }
+  }
 }

@@ -28,6 +28,11 @@ public class UserStatus extends BaseUpdatableEntity {
   @Column(nullable = false)
   private Instant lastActiveAt;
 
+  // 연관관계 편의 메서드
+  public void setUser(User user) {
+    this.user = user;
+  }
+
   public Boolean isOnline() {
     Instant instantFiveMinutesAgo = Instant.now().minus(Duration.ofMinutes(5));
 
