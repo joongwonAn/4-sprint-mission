@@ -1,0 +1,28 @@
+package com.sprint.mission.discodeit.entity;
+
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import lombok.NoArgsConstructor;
+
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+public class Channel extends BaseUpdatableEntity {
+
+  @Enumerated(value = EnumType.STRING)
+  @Column(nullable = false)
+  private ChannelType type;
+
+  @Column(length = 100, nullable = true)
+  private String name;
+
+  @Column(length = 500, nullable = true)
+  private String description;
+}
