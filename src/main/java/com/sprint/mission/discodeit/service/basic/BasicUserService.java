@@ -22,9 +22,9 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.transaction.annotation.Transactional;
 
-@RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
