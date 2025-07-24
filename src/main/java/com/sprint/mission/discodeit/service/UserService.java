@@ -12,14 +12,13 @@ import java.util.UUID;
 
 public interface UserService {
 
-  User create(UserCreateRequest userCreateRequest,
-      Optional<BinaryContentCreateRequest> profileCreateRequest);
+  User create(UserCreateRequest request, Optional<BinaryContentCreateRequest> profileCreateRequest);
 
   UserDto find(UUID userId);
 
   List<UserDto> findAll();
 
-  User update(UUID userId, UserUpdateRequest userUpdateRequest,
+  User update(UUID userId, UserUpdateRequest request,
       Optional<BinaryContentCreateRequest> profileCreateRequest);
 
   void delete(UUID userId);

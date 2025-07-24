@@ -7,16 +7,18 @@ import com.sprint.mission.discodeit.entity.User;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {BinaryContentMapper.class, UserStatusMapper.class})
 public interface UserMapper {
 
+  @Mapping(source = "profile", target = "profile", qualifiedByName = "toEntity")
   User toCreateEntity(UserCreateRequest request);
 
   @Mapping(source = "newUsername", target = "username")
   @Mapping(source = "newEmail", target = "email")
   @Mapping(source = "newPassword", target = "password")
-  User toUpdateEntity(UserUpdateRequest request);
+  void toUpdateEntity(UserUpdateRequest request, @MappingTarget User user);
 
   UserDto toDto(User user);
 
