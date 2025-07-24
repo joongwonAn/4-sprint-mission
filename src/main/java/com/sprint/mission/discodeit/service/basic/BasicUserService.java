@@ -40,12 +40,12 @@ public class BasicUserService implements UserService {
     duplicateCheck(null, request.username(), request.email());
 
     // MapStruct로 기본 정보 매핑
-    User user = userMapper.toCreateEntity(request);
+    User user = userMapper.fromCreateRequest(request);
 
     // UserStatus
     Instant lastActiveAt = Optional.ofNullable(request.lastActiveAt())
         .orElse(Instant.now());
-    UserStatus userStatus = userStatusMapper.toCreateEntity(user, lastActiveAt);
+    UserStatus userStatus = userStatusMapper.fromCreateRequest(user, lastActiveAt);
     // 연관관계 설정
     user.setStatus(userStatus);
 
@@ -55,8 +55,7 @@ public class BasicUserService implements UserService {
   @Override
   @Transactional(readOnly = true)
   public UserDto find(UUID userId) {
-    User user = checkUser(userId);
-    return userMapper.toDto(user);
+    return userMapper.toDto(checkUser(userId));
   }
 
   // !!!!!!!!!!!!!!!! 페이징 구현 필요, Page<UserDto>
@@ -76,7 +75,7 @@ public class BasicUserService implements UserService {
     duplicateCheck(userId, request.newUsername(), request.newEmail());
 
     // update
-    userMapper.toUpdateEntity(request, user);
+    userMapper.fromUpdateRequest(request, user);
     // 프로필 이미지
     if (optionalProfileCreateRequest.isPresent()) {
       BinaryContentCreateRequest profileRequest = optionalProfileCreateRequest.get();

@@ -13,12 +13,12 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
 
   @Mapping(source = "profile", target = "profile", qualifiedByName = "toEntity")
-  User toCreateEntity(UserCreateRequest request);
+  User fromCreateRequest(UserCreateRequest request);
 
   @Mapping(source = "newUsername", target = "username")
   @Mapping(source = "newEmail", target = "email")
   @Mapping(source = "newPassword", target = "password")
-  void toUpdateEntity(UserUpdateRequest request, @MappingTarget User user);
+  void fromUpdateRequest(UserUpdateRequest request, @MappingTarget User user);
 
   UserDto toDto(User user);
 
