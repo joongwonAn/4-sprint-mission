@@ -13,7 +13,7 @@ public interface MessageMapper {
 
   Message toCreateEntity(MessageCreateRequest request);
 
-  @Mapping(source = "newContent", target = "content")
+//  @Mapping(source = "newContent", target = "content")
   Message toUpdateEntity(MessageUpdateRequest request);
 
   MessageDto toDto(Message Message);

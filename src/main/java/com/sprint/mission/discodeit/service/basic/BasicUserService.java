@@ -7,12 +7,13 @@ import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.mapper.UserStatusMapper;
-import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,103 +24,110 @@ import java.util.UUID;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
-  private final BinaryContentRepository binaryContentRepository;
   private final UserMapper userMapper;
   private final UserStatusMapper userStatusMapper;
+  private final BinaryContentMapper binaryContentMapper;
 
   @Override
   @Transactional
-  public User create(UserCreateRequest request,
+  public UserDto create(UserCreateRequest request,
       Optional<BinaryContentCreateRequest> optionalProfileCreateRequest) {
-    // username, email 중복 검사
-    duplicateCheck(null, request.username(), request.email());
+    validateUsernameDuplicate(request.username());
+    validateEmailDuplicate(request.email());
 
-    // MapStruct로 기본 정보 매핑
-    User user = userMapper.fromCreateRequest(request);
+    User user = userMapper.mapToEntity(request);
 
-    // UserStatus
-    Instant lastActiveAt = Optional.ofNullable(request.lastActiveAt())
-        .orElse(Instant.now());
-    UserStatus userStatus = userStatusMapper.fromCreateRequest(user, lastActiveAt);
-    // 연관관계 설정
+    optionalProfileCreateRequest.ifPresent(profileCreateRequest -> {
+      BinaryContent profile = binaryContentMapper.mapToEntity(profileCreateRequest);
+      user.setProfile(profile);
+    });
+
+    UserStatus userStatus = userStatusMapper.mapToEntity(user, Instant.now());
     user.setStatus(userStatus);
 
-    return userRepository.save(user);
+    return userMapper.mapToDto(userRepository.save(user));
   }
 
   @Override
   @Transactional(readOnly = true)
   public UserDto find(UUID userId) {
-    return userMapper.toDto(checkUser(userId));
+    return userMapper.mapToDto(getFindingUser(userId));
   }
 
   // !!!!!!!!!!!!!!!! 페이징 구현 필요, Page<UserDto>
   @Override
   @Transactional(readOnly = true)
   public List<UserDto> findAll() {
-    List<User> users = userRepository.findAll();
-    return userMapper.toDtoList(users);
+    return userMapper.mapToDtoList(userRepository.findAll());
   }
 
   @Override
   @Transactional
-  public User update(UUID userId, UserUpdateRequest request,
+  public UserDto update(UUID userId, UserUpdateRequest request,
       Optional<BinaryContentCreateRequest> optionalProfileCreateRequest) {
-    // user 확인 && 중복 검사
-    User user = checkUser(userId);
-    duplicateCheck(userId, request.newUsername(), request.newEmail());
+    User user = getFindingUser(userId);
+    validateUsernameDuplicate(request.newUsername());
+    validateEmailDuplicate(request.newEmail());
 
-    // update
-    userMapper.fromUpdateRequest(request, user);
-    // 프로필 이미지
-    if (optionalProfileCreateRequest.isPresent()) {
-      BinaryContentCreateRequest profileRequest = optionalProfileCreateRequest.get();
-      BinaryContent newProfile = new BinaryContent(
-          profileRequest.fileName(),
-          (long) profileRequest.bytes().length,
-          profileRequest.contentType(),
-          profileRequest.bytes()
-      );
+    UserUpdateRequest updateRequest = new UserUpdateRequest(
+        request.newUsername(),
+        request.newEmail(),
+        request.newPassword(),
+        optionalProfileCreateRequest.orElse(null)
+    );
 
-      Optional.ofNullable(user.getProfile().getId())
-          .ifPresent(binaryContentRepository::deleteById);
-
-      user.setProfile(binaryContentRepository.save(newProfile));
+    User newUser = userMapper.mapToUpdatedEntity(updateRequest);
+    if (newUser.getUsername() != null && !Objects.equals(user.getUsername(),
+        newUser.getUsername())) {
+      user.setUsername(newUser.getUsername());
+    }
+    if (newUser.getEmail() != null && !Objects.equals(user.getEmail(), newUser.getEmail())) {
+      user.setEmail(newUser.getEmail());
+    }
+    if (newUser.getPassword() != null && !Objects.equals(user.getPassword(),
+        newUser.getPassword())) {
+      user.setPassword(newUser.getPassword());
+    }
+    if (!Objects.equals(user.getProfile(), newUser.getProfile())) {
+      user.setProfile(newUser.getProfile());
     }
 
-    return userRepository.save(user);
+    return userMapper.mapToDto(userRepository.save(user));
   }
 
   @Override
   @Transactional
   public void delete(UUID userId) {
-    User user = checkUser(userId);
-    userRepository.delete(user);
+    userRepository.delete(getFindingUser(userId));
   }
 
   // 공통 메서드
-  private User checkUser(UUID userId) {
+  private User getFindingUser(UUID userId) {
     return userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException("User with id " + userId + " not found"));
   }
 
-  private void duplicateCheck(UUID userId, String username, String email) {
-    userRepository.findByUsername(username)
-        .filter(user -> !user.getId().equals(userId))
-        .ifPresent(user -> {
-          throw new IllegalArgumentException("User with username " + username + " already exists");
-        });
+  private void validateUsernameDuplicate(String username) {
+    if (username != null) {
+      userRepository.findByUsername(username)
+          .ifPresent(user -> {
+            throw new IllegalArgumentException(
+                "User with username " + username + " already exists");
+          });
+    }
+  }
 
-    userRepository.findByEmail(email)
-        .filter(user -> !user.getId().equals(userId))
-        .ifPresent(user -> {
-          throw new IllegalArgumentException("User with email " + email + " already exists");
-        });
+  private void validateEmailDuplicate(String email) {
+    if (email != null) {
+      userRepository.findByEmail(email)
+          .ifPresent(user -> {
+            throw new IllegalArgumentException("User with email " + email + " already exists");
+          });
+    }
   }
 
 }

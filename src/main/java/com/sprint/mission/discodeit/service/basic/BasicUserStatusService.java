@@ -17,7 +17,6 @@ import java.util.UUID;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BasicUserStatusService implements UserStatusService {
 
@@ -28,46 +27,56 @@ public class BasicUserStatusService implements UserStatusService {
   @Override
   @Transactional(readOnly = true)
   public UserStatusDto find(UUID userStatusId) {
-    return userStatusMapper.toDto(checkUserStatus(userStatusId));
+    return userStatusMapper.mapToDto(getFindingStatus(userStatusId));
   }
 
   // PAGING !!!!!!!!!!!!!!!
   @Override
   @Transactional(readOnly = true)
   public List<UserStatusDto> findAll() {
-    return userStatusMapper.toDtoList(userStatusRepository.findAll());
+    return userStatusMapper.mapToDtoList(userStatusRepository.findAll());
   }
 
   @Override
   @Transactional
-  public UserStatus update(UUID userStatusId, UserStatusUpdateRequest request) {
-    UserStatus userStatus = checkUserStatus(userStatusId);
-    userStatusMapper.fromUpdateRequest(request, userStatus);
-    return userStatusRepository.save(userStatus);
+  public UserStatusDto update(UUID userStatusId, UserStatusUpdateRequest request) {
+    UserStatus userStatus = getFindingStatus(userStatusId);
+
+    UserStatus updatedUserStatus = userStatusMapper.mapToUpdateEntity(request);
+    if (updatedUserStatus.getLastActiveAt() != null) {
+      userStatus.setLastActiveAt(updatedUserStatus.getLastActiveAt());
+    }
+
+    return userStatusMapper.mapToDto(userStatusRepository.save(userStatus));
   }
 
   @Override
   @Transactional
-  public UserStatus updateByUserId(UUID userId, UserStatusUpdateRequest request) {
-    User user = checkUser(userId);
-    userStatusMapper.fromUpdateRequest(request, user.getStatus());
-    return userStatusRepository.save(user.getStatus());
+  public UserStatusDto updateByUserId(UUID userId, UserStatusUpdateRequest request) {
+    User user = getFindingUser(userId);
+    UserStatus userStatus = user.getStatus();
+    userStatusMapper.mapToEntity(user, request.newLastActiveAt());
+    if (request.newLastActiveAt() != null) {
+      userStatus.setLastActiveAt(request.newLastActiveAt());
+    }
+
+    return userStatusMapper.mapToDto(userStatusRepository.save(userStatus));
   }
 
   @Override
   @Transactional
   public void delete(UUID userStatusId) {
-    UserStatus userStatus = checkUserStatus(userStatusId);
-    userStatusRepository.delete(userStatus);
+    userStatusRepository.delete(getFindingStatus(userStatusId));
   }
 
-  private UserStatus checkUserStatus(UUID userStatusId) {
+  // 공통 메서드
+  private UserStatus getFindingStatus(UUID userStatusId) {
     return userStatusRepository.findById(userStatusId)
         .orElseThrow(
             () -> new NoSuchElementException("UserStatus with id " + userStatusId + " not found"));
   }
 
-  private User checkUser(UUID userId) {
+  private User getFindingUser(UUID userId) {
     return userRepository.findById(userId)
         .orElseThrow(() -> new NoSuchElementException("User with id " + userId + " not found"));
   }

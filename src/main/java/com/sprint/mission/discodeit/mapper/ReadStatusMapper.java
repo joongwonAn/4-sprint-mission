@@ -11,12 +11,12 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ReadStatusMapper {
 
-  ReadStatus toCreateEntity(ReadStatusCreateRequest request);
+  ReadStatus mapToCreateEntity(ReadStatusCreateRequest request);
 
-  @Mapping(source = "newLastReadAt", target = "lastReadAt")
-  ReadStatus toUpdateEntity(ReadStatusUpdateRequest request);
+//  @Mapping(source = "newLastReadAt", target = "lastReadAt")
+  ReadStatus mapToUpdateEntity(ReadStatusUpdateRequest request);
 
-  ReadStatusDto toDto(ReadStatus readStatus);
+  ReadStatusDto mapToDto(ReadStatus readStatus);
 
-  List<ReadStatusDto> toDtoList(List<ReadStatus> readStatuses);
+  List<ReadStatusDto> mapToDtoList(List<ReadStatus> readStatuses);
 }

@@ -1,13 +1,13 @@
 package com.sprint.mission.discodeit.entity.base;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import jakarta.persistence.MappedSuperclass;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
 
-@Entity
+@MappedSuperclass
 @NoArgsConstructor
 @Getter
 public abstract class BaseUpdatableEntity extends BaseEntity {

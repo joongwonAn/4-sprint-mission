@@ -7,12 +7,14 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "binary_contents")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class BinaryContent extends BaseEntity {
 
   @Column(length = 255, nullable = false)

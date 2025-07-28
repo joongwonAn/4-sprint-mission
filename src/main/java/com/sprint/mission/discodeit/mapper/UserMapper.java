@@ -7,20 +7,19 @@ import com.sprint.mission.discodeit.entity.User;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring", uses = {BinaryContentMapper.class, UserStatusMapper.class})
 public interface UserMapper {
 
-  @Mapping(source = "profile", target = "profile", qualifiedByName = "toEntity")
-  User fromCreateRequest(UserCreateRequest request);
+  User mapToEntity(UserCreateRequest request);
 
   @Mapping(source = "newUsername", target = "username")
   @Mapping(source = "newEmail", target = "email")
   @Mapping(source = "newPassword", target = "password")
-  void fromUpdateRequest(UserUpdateRequest request, @MappingTarget User user);
+  User mapToUpdatedEntity(UserUpdateRequest request);
 
-  UserDto toDto(User user);
+  @Mapping(target = "online", expression = "java(user.getStatus() != null && user.getStatus().isOnline())")
+  UserDto mapToDto(User user);
 
-  List<UserDto> toDtoList(List<User> users);
+  List<UserDto> mapToDtoList(List<User> users);
 }

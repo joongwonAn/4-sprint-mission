@@ -10,12 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "channels")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class Channel extends BaseUpdatableEntity {
 
   @Enumerated(value = EnumType.STRING)

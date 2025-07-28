@@ -8,19 +8,18 @@ import java.time.Instant;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserStatusMapper {
 
-  default UserStatus fromCreateRequest(User user, Instant lastActiveAt) {
+  default UserStatus mapToEntity(User user, Instant lastActiveAt) {
     return new UserStatus(user, lastActiveAt);
   }
 
   @Mapping(source = "newLastActiveAt", target = "lastActiveAt")
-  void fromUpdateRequest(UserStatusUpdateRequest request, @MappingTarget UserStatus userStatus);
+  UserStatus mapToUpdateEntity(UserStatusUpdateRequest request);
 
-  UserStatusDto toDto(UserStatus userStatus);
+  UserStatusDto mapToDto(UserStatus userStatus);
 
-  List<UserStatusDto> toDtoList(List<UserStatus> userStatuses);
+  List<UserStatusDto> mapToDtoList(List<UserStatus> userStatuses);
 }
