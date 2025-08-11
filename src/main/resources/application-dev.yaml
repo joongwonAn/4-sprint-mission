@@ -9,7 +9,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     defer-datasource-initialization: true # 데이터 소스 초기화 시점 지연(sql 파일 실행 시점 뒤로)
     show-sql: true # 실행되는 SQL 쿼리 콘솔 출력
     properties:
