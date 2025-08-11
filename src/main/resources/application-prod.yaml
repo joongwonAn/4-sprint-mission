@@ -19,7 +19,7 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: WARN
+    org.hibernate.SQL: INFO
     org.hibernate.orm.jdbc.bind: ERROR
 
 server:
