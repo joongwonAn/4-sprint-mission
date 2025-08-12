@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class ChannelController implements ChannelApi {
     private final ChannelService channelService;
 
     @PostMapping(path = "public")
-    public ResponseEntity<ChannelDto> create(@RequestBody PublicChannelCreateRequest request) {
+    public ResponseEntity<ChannelDto> create(@Valid @RequestBody PublicChannelCreateRequest request) {
         log.info("[CHANNEL] Public 채널 생성 요청 받음: request = {}", request);
         ChannelDto createdChannel = channelService.create(request);
         log.info("[CHANNEL] Public 채널 생성 요청 성공: createdChannel = {}", createdChannel);
@@ -54,7 +55,7 @@ public class ChannelController implements ChannelApi {
 
     @PatchMapping(path = "{channelId}")
     public ResponseEntity<ChannelDto> update(@PathVariable("channelId") UUID channelId,
-                                             @RequestBody PublicChannelUpdateRequest request) {
+                                             @Valid @RequestBody PublicChannelUpdateRequest request) {
         log.info("[CHANNEL] 채널 업데이트 요청 받음: channelId = {}", channelId);
         ChannelDto updatedChannel = channelService.update(channelId, request);
         log.info("[CHANNEL] 채널 업데이트 요청 성공: updatedChannel = {}", updatedChannel);
