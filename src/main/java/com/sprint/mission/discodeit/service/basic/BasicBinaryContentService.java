@@ -3,13 +3,14 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.data.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.request.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentNotFoundException;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -49,8 +50,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     public BinaryContentDto find(UUID binaryContentId) {
         return binaryContentRepository.findById(binaryContentId)
                 .map(binaryContentMapper::toDto)
-                .orElseThrow(() -> new NoSuchElementException(
-                        "BinaryContent with id " + binaryContentId + " not found"));
+                .orElseThrow(() -> new BinaryContentNotFoundException(Map.of("binaryContentId", binaryContentId)));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class BasicBinaryContentService implements BinaryContentService {
         log.info("[BINARYCONTENT] 파일 삭제 시작: binaryContentId = {}", binaryContentId);
         if (!binaryContentRepository.existsById(binaryContentId)) {
             log.error("[BINARYCONTENT] binaryContnetId = {}인 파일 찾을 수 없음", binaryContentId);
-            throw new NoSuchElementException("BinaryContent with id " + binaryContentId + " not found");
+            throw new BinaryContentNotFoundException(Map.of("binaryContentId", binaryContentId));
         }
 
         log.info("[BINARYCONTENT] 파일 삭제 성공: binaryContentId = {}", binaryContentId);

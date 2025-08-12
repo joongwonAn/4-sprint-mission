@@ -7,6 +7,8 @@ import com.sprint.mission.discodeit.dto.request.PublicChannelUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.channel.ChannelPrivateUpdateNotAllowedException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -15,7 +17,7 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Map;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -72,7 +74,7 @@ public class BasicChannelService implements ChannelService {
         return channelRepository.findById(channelId)
                 .map(channelMapper::toDto)
                 .orElseThrow(
-                        () -> new NoSuchElementException("Channel with id " + channelId + " not found"));
+                        () -> new ChannelNotFoundException(Map.of("channelId", channelId)));
     }
 
     @Transactional(readOnly = true)
@@ -96,14 +98,13 @@ public class BasicChannelService implements ChannelService {
         String newName = request.newName();
         String newDescription = request.newDescription();
         Channel channel = channelRepository.findById(channelId)
-                // log.error()어디에 할 수 있음?
                 .orElseThrow(() -> {
                     log.error("[CHANNEL] channelId = {}를 찾을 수 없음", channelId);
-                    return new NoSuchElementException("Channel with id " + channelId + " not found");
+                    return new ChannelNotFoundException(Map.of("channelId", channelId));
                 });
         if (channel.getType().equals(ChannelType.PRIVATE)) {
             log.error("[CHANNEL] Private 채널은 업데이트 할 수 없음");
-            throw new IllegalArgumentException("Private channel cannot be updated");
+            throw new ChannelPrivateUpdateNotAllowedException(Map.of("channelId", channelId));
         }
         channel.update(newName, newDescription);
         log.info("[CHANNEL] 채널 업데이트 성공: channel = {}", channel);
@@ -116,7 +117,7 @@ public class BasicChannelService implements ChannelService {
         log.info("[CHANNEL] 채널 삭제 시작: channelId = {}", channelId);
         if (!channelRepository.existsById(channelId)) {
             log.warn("[CHANNEL] channelId = {}를 찾을 수 없음", channelId);
-            throw new NoSuchElementException("Channel with id " + channelId + " not found");
+            throw new ChannelNotFoundException(Map.of("channelId", channelId));
         }
 
         messageRepository.deleteAllByChannelId(channelId);
