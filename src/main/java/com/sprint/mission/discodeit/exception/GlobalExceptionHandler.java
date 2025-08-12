@@ -1,14 +1,31 @@
 package com.sprint.mission.discodeit.exception;
 
+import java.time.Instant;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleException(MethodArgumentNotValidException e) {
+        e.printStackTrace();
+        ErrorResponse errorResponse = new ErrorResponse(
+                Instant.now(),
+                ErrorCode.VALIDATION_FAILED.getCode(),
+                e.getMessage(),
+                Map.of("error", ErrorCode.VALIDATION_FAILED.getMessage()),
+                e.getClass().getName(),
+                ErrorCode.VALIDATION_FAILED.getStatus()
+                );
+        return ResponseEntity.status(ErrorCode.VALIDATION_FAILED.getStatus()).body(errorResponse);
+    }
 
     @ExceptionHandler(DiscodeitException.class)
     public ResponseEntity<ErrorResponse> handleException(DiscodeitException e) {

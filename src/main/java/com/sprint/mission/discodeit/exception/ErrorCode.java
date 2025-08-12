@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST.value(), "E001", "유효성 검사 실패"),
+
     // Auth
     AUTH_FAILED(HttpStatus.UNAUTHORIZED.value(), "A002", "Authentication Failed"),
 
