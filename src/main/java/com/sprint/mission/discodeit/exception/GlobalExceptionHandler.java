@@ -20,8 +20,8 @@ public class GlobalExceptionHandler {
                 Instant.now(),
                 ErrorCode.VALIDATION_FAILED.getCode(),
                 e.getMessage(),
-                Map.of("error", ErrorCode.VALIDATION_FAILED.getMessage()),
-                e.getClass().getName(),
+                Map.of("error", null),
+                ErrorCode.VALIDATION_FAILED.getCode(),
                 ErrorCode.VALIDATION_FAILED.getStatus()
                 );
         return ResponseEntity.status(ErrorCode.VALIDATION_FAILED.getStatus()).body(errorResponse);
