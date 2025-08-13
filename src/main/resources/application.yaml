@@ -14,3 +14,25 @@ discodeit:
     type: local
     local:
       root-path: .discodeit/storage
+
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+        exclude: ''
+
+info:
+  app:
+    name: Discodeit
+    app-version: 1.7.0
+    java-version: 17
+    spring-boot-version: 3.4.0
+    main configuration infomation:
+      data-source: url, 드라이버 클래스 이름
+      jpa: ddl-auto
+      storage setting: type, path
+      multipart setting: max-file-size, max-request-size
