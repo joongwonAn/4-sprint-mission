@@ -2,8 +2,10 @@ package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.dto.data.UserDto;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.user.UserEmailAlreadyExistsException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
@@ -91,17 +93,63 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("사용자 정보 수정 성공")
     void user_update_success() {
         // given
-
+        UserUpdateRequest request = new UserUpdateRequest(
+                "userUserName",
+                "newEmail@codeit,com",
+                "newPassword"
+        );
+        // 유저 준비
+        User user = mock(User.class);
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        // 중복 체크 통과
+        when(userRepository.existsByEmail(anyString())).thenReturn(false);
+        when(userRepository.existsByUsername(anyString())).thenReturn(false);
+        // 예상 DTO
+        UserDto expectDto = new UserDto(
+                userId,
+                request.newUsername(),
+                request.newEmail(),
+                null,
+                true
+        );
+        // 예상 DTO 반환
+        when(userMapper.toDto(any(User.class))).thenReturn(expectDto);
 
         // when
-
+        UserDto result = userService.update(userId, request, Optional.empty());
 
         // then
+        assertAll(
+                () -> assertEquals(expectDto.id(), result.id()),
+                () -> assertEquals(expectDto.username(), result.username()),
+                () -> assertEquals(expectDto.email(), result.email()),
+                () -> assertEquals(expectDto.profile(), result.profile()),
+                () -> assertEquals(expectDto.online(), result.online())
+        );
+    }
 
+    @Test
+    @DisplayName("해당 회원이 존재하지 않아서 업데이트 실패")
+    void user_update_fail_user_not_found() {
+        // given
+        UserUpdateRequest request = new UserUpdateRequest(
+                "userUserName",
+                "newEmail@codeit,com",
+                "newPassword"
+        );
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // when
+        // then
+        assertThrows(UserNotFoundException.class, () -> userService.update(userId, request, Optional.empty()));
 
     }
+
 
     @Test
     void delete() {
