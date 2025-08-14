@@ -8,6 +8,9 @@ import com.sprint.mission.discodeit.dto.request.PublicChannelUpdateRequest;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -22,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -202,5 +206,78 @@ class ChannelServiceTest {
         verify(channelRepository, times(1)).deleteById(channelId);
         verify(messageRepository, times(1)).deleteAllByChannelId(channelId);
         verify(readStatusRepository, times(1)).deleteAllByChannelId(channelId);
+    }
+
+    @Test
+    @DisplayName("public channel 생성 시 DB 저장 실패로 예외 발생")
+    void should_throw_runtime_exception_when_db_save_fail_on_public_channel_create() {
+        //given
+        PublicChannelCreateRequest request = new PublicChannelCreateRequest(
+                "name",
+                "description"
+        );
+        when(channelRepository.save(any(Channel.class)))
+                .thenThrow(new RuntimeException("DB 저장 실패"));
+
+        // when & then
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> channelService.create(request));
+        assertEquals("DB 저장 실패", exception.getMessage());
+        verify(channelRepository, times(1)).save(any(Channel.class));
+    }
+
+    @Test
+    @DisplayName("private channel 생성 시 사용자 조회 실패로 예외 발생")
+    void should_throw_user_not_found_exception_when_private_channel_create() {
+        // given
+        PrivateChannelCreateRequest request = new PrivateChannelCreateRequest(
+                List.of(UUID.randomUUID(), UUID.randomUUID())
+        );
+        Channel savedChannel = new Channel(
+                ChannelType.PRIVATE,
+                null,
+                null
+        );
+        when(channelRepository.save(any(Channel.class))).thenReturn(savedChannel);
+
+        when(userRepository.findAllById(request.participantIds()))
+                .thenThrow(new UserNotFoundException(Map.of("participantIds", request.participantIds())));
+
+        // when & then
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> channelService.create(request));
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        verify(channelRepository, times(1)).save(any(Channel.class));
+        verify(userRepository, times(1)).findAllById(request.participantIds());
+    }
+
+    @Test
+    @DisplayName("public channel 수정 시 채널 미존재로 예외 발생")
+    void should_throw_channel_not_found_exception_when_channel_update() {
+        // given
+        UUID channelId = UUID.randomUUID();
+        PublicChannelUpdateRequest request = new PublicChannelUpdateRequest(
+                "newName",
+                "newDescription"
+        );
+        when(channelRepository.findById(channelId))
+                .thenThrow(new ChannelNotFoundException(Map.of("channelId", channelId)));
+
+        // when & then
+        ChannelNotFoundException exception = assertThrows(ChannelNotFoundException.class, () -> channelService.update(channelId, request));
+        assertEquals(ErrorCode.CHANNEL_NOT_FOUND, exception.getErrorCode());
+        verify(channelRepository, times(1)).findById(channelId);
+    }
+
+    @Test
+    @DisplayName("channel 삭제 시 channel 미존재로 예외 발생")
+    void should_throw_channel_not_found_exception_when_channel_delete() {
+        // given
+        UUID channelId = UUID.randomUUID();
+        when(channelRepository.existsById(channelId))
+                .thenThrow(new ChannelNotFoundException(Map.of("channelId", channelId)));
+
+        // when & then
+        ChannelNotFoundException exception = assertThrows(ChannelNotFoundException.class, () -> channelService.delete(channelId));
+        assertEquals(ErrorCode.CHANNEL_NOT_FOUND, exception.getErrorCode());
+        verify(channelRepository, times(1)).existsById(channelId);
     }
 }
