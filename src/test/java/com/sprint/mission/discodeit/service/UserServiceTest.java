@@ -152,6 +152,29 @@ class UserServiceTest {
 
 
     @Test
-    void delete() {
+    @DisplayName("사용자 삭제 성공")
+    void user_delete_success() {
+        // given
+        UUID userId = UUID.randomUUID();
+        when(userRepository.existsById(userId)).thenReturn(true);
+
+        // when
+        userService.delete(userId);
+
+        // then
+        verify(userRepository, times(1)).deleteById(userId);
+    }
+
+    @Test
+    @DisplayName("해당 회원이 존재하지 않아 삭제 실패")
+    void user_delete_fail_user_not_found() {
+        // given
+        UUID userId = UUID.randomUUID();
+        when(userRepository.existsById(userId)).thenReturn(false);
+
+        // when
+        // then
+        assertThrows(UserNotFoundException.class, () -> userService.delete(userId));
+        verify(userRepository, never()).deleteById(any());
     }
 }
