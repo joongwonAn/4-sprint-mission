@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,7 +65,7 @@ class ChannelServiceTest {
                 request.name(),
                 request.description()
         );
-        when(channelRepository.save(any(Channel.class))).thenReturn(savedChannel);
+        given(channelRepository.save(any(Channel.class))).willReturn(savedChannel);
 
         ChannelDto expect = new ChannelDto(
                 savedChannel.getId(),
@@ -74,7 +75,7 @@ class ChannelServiceTest {
                 null,
                 null
         );
-        when(channelMapper.toDto(any(Channel.class))).thenReturn(expect);
+        given(channelMapper.toDto(any(Channel.class))).willReturn(expect);
 
         // when
         ChannelDto result = channelService.create(request);
@@ -89,8 +90,8 @@ class ChannelServiceTest {
                 () -> assertEquals(expect.participants(), result.participants()),
                 () -> assertEquals(expect.lastMessageAt(), result.lastMessageAt())
         );
-        verify(channelRepository, times(1)).save(any(Channel.class));
-        verify(channelMapper, times(1)).toDto(any(Channel.class));
+        then(channelRepository).should(times(1)).save(any(Channel.class));
+        then(channelMapper).should(times(1)).toDto(any(Channel.class));
     }
 
     @Test
@@ -105,12 +106,12 @@ class ChannelServiceTest {
                 null,
                 null
         );
-        when(channelRepository.save(any(Channel.class))).thenReturn(savedChannel);
+        given(channelRepository.save(any(Channel.class))).willReturn(savedChannel);
 
         User user1 = new User("user1", "user1@codeit.com", "password", null);
         User user2 = new User("user2", "user2@codeit.com", "password", null);
-        when(userRepository.findAllById(request.participantIds())).thenReturn(List.of(user1, user2));
-        when(readStatusRepository.saveAll(anyList())).thenReturn(null);
+        given(userRepository.findAllById(request.participantIds())).willReturn(List.of(user1, user2));
+        given(readStatusRepository.saveAll(anyList())).willReturn(null);
 
         List<UserDto> expectParticipants = List.of(
                 new UserDto(user1.getId(), user1.getUsername(), user1.getEmail(), null, true),
@@ -124,7 +125,7 @@ class ChannelServiceTest {
                 expectParticipants,
                 null
         );
-        when(channelMapper.toDto(any(Channel.class))).thenReturn(expect);
+        given(channelMapper.toDto(any(Channel.class))).willReturn(expect);
 
         // when
         ChannelDto result = channelService.create(request);
@@ -139,10 +140,10 @@ class ChannelServiceTest {
                 () -> assertEquals(expect.participants(), result.participants()),
                 () -> assertEquals(expect.lastMessageAt(), result.lastMessageAt())
         );
-        verify(channelRepository, times(1)).save(any(Channel.class));
-        verify(readStatusRepository, times(1)).saveAll(anyList());
-        verify(userRepository, times(1)).findAllById(request.participantIds());
-        verify(channelMapper, times(1)).toDto(any(Channel.class));
+        then(channelRepository).should(times(1)).save(any(Channel.class));
+        then(readStatusRepository).should(times(1)).saveAll(anyList());
+        then(userRepository).should(times(1)).findAllById(request.participantIds());
+        then(channelMapper).should(times(1)).toDto(any(Channel.class));
     }
 
     @Test
@@ -159,7 +160,7 @@ class ChannelServiceTest {
                 "name",
                 "description"
         );
-        when(channelRepository.findById(channelId)).thenReturn(Optional.of(channel));
+        given(channelRepository.findById(channelId)).willReturn(Optional.of(channel));
 
         ChannelDto expect = new ChannelDto(
                 channel.getId(),
@@ -169,7 +170,7 @@ class ChannelServiceTest {
                 null,
                 null
         );
-        when(channelMapper.toDto(any(Channel.class))).thenReturn(expect);
+        given(channelMapper.toDto(any(Channel.class))).willReturn(expect);
 
         // when
         ChannelDto result = channelService.update(channelId, request);
@@ -184,8 +185,8 @@ class ChannelServiceTest {
                 () -> assertEquals(expect.participants(), result.participants()),
                 () -> assertEquals(expect.lastMessageAt(), result.lastMessageAt())
         );
-        verify(channelRepository, times(1)).findById(channelId);
-        verify(channelMapper, times(1)).toDto(any(Channel.class));
+        then(channelRepository).should(times(1)).findById(channelId);
+        then(channelMapper).should(times(1)).toDto(any(Channel.class));
     }
 
     @Test
@@ -193,19 +194,19 @@ class ChannelServiceTest {
     void delete() {
         // given
         UUID channelId = UUID.randomUUID();
-        when(channelRepository.existsById(channelId)).thenReturn(true);
+        given(channelRepository.existsById(channelId)).willReturn(true);
 
-        doNothing().when(messageRepository).deleteAllByChannelId(channelId);
-        doNothing().when(readStatusRepository).deleteAllByChannelId(channelId);
+        willDoNothing().given(messageRepository).deleteAllByChannelId(channelId);
+        willDoNothing().given(readStatusRepository).deleteAllByChannelId(channelId);
 
         // when
         channelService.delete(channelId);
 
         // then
-        verify(channelRepository, times(1)).existsById(channelId);
-        verify(channelRepository, times(1)).deleteById(channelId);
-        verify(messageRepository, times(1)).deleteAllByChannelId(channelId);
-        verify(readStatusRepository, times(1)).deleteAllByChannelId(channelId);
+        then(channelRepository).should(times(1)).existsById(channelId);
+        then(channelRepository).should(times(1)).deleteById(channelId);
+        then(messageRepository).should(times(1)).deleteAllByChannelId(channelId);
+        then(readStatusRepository).should(times(1)).deleteAllByChannelId(channelId);
     }
 
     @Test
@@ -216,13 +217,12 @@ class ChannelServiceTest {
                 "name",
                 "description"
         );
-        when(channelRepository.save(any(Channel.class)))
-                .thenThrow(new RuntimeException("DB 저장 실패"));
+        given(channelRepository.save(any(Channel.class))).willThrow(new RuntimeException("DB 저장 실패"));
 
         // when & then
         RuntimeException exception = assertThrows(RuntimeException.class, () -> channelService.create(request));
         assertEquals("DB 저장 실패", exception.getMessage());
-        verify(channelRepository, times(1)).save(any(Channel.class));
+        then(channelRepository).should(times(1)).save(any(Channel.class));
     }
 
     @Test
@@ -237,16 +237,16 @@ class ChannelServiceTest {
                 null,
                 null
         );
-        when(channelRepository.save(any(Channel.class))).thenReturn(savedChannel);
+        given(channelRepository.save(any(Channel.class))).willReturn(savedChannel);
 
-        when(userRepository.findAllById(request.participantIds()))
-                .thenThrow(new UserNotFoundException(Map.of("participantIds", request.participantIds())));
+        given(userRepository.findAllById(request.participantIds()))
+                .willThrow(new UserNotFoundException(Map.of("participantIds", request.participantIds())));
 
         // when & then
         UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> channelService.create(request));
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
-        verify(channelRepository, times(1)).save(any(Channel.class));
-        verify(userRepository, times(1)).findAllById(request.participantIds());
+        then(channelRepository).should(times(1)).save(any(Channel.class));
+        then(userRepository).should(times(1)).findAllById(request.participantIds());
     }
 
     @Test
@@ -258,13 +258,13 @@ class ChannelServiceTest {
                 "newName",
                 "newDescription"
         );
-        when(channelRepository.findById(channelId))
-                .thenThrow(new ChannelNotFoundException(Map.of("channelId", channelId)));
+        given(channelRepository.findById(channelId))
+                .willThrow(new ChannelNotFoundException(Map.of("channelId", channelId)));
 
         // when & then
         ChannelNotFoundException exception = assertThrows(ChannelNotFoundException.class, () -> channelService.update(channelId, request));
         assertEquals(ErrorCode.CHANNEL_NOT_FOUND, exception.getErrorCode());
-        verify(channelRepository, times(1)).findById(channelId);
+        then(channelRepository).should(times(1)).findById(channelId);
     }
 
     @Test
@@ -272,12 +272,12 @@ class ChannelServiceTest {
     void should_throw_channel_not_found_exception_when_channel_delete() {
         // given
         UUID channelId = UUID.randomUUID();
-        when(channelRepository.existsById(channelId))
-                .thenThrow(new ChannelNotFoundException(Map.of("channelId", channelId)));
+        given(channelRepository.existsById(channelId))
+                .willThrow(new ChannelNotFoundException(Map.of("channelId", channelId)));
 
         // when & then
         ChannelNotFoundException exception = assertThrows(ChannelNotFoundException.class, () -> channelService.delete(channelId));
         assertEquals(ErrorCode.CHANNEL_NOT_FOUND, exception.getErrorCode());
-        verify(channelRepository, times(1)).existsById(channelId);
+        then(channelRepository).should(times(1)).existsById(channelId);
     }
 }
