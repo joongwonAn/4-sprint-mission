@@ -3,6 +3,7 @@ spring:
     activate:
       on-profiles: test
 
+
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL # postgreSQL과 호환
     driver-class-name: org.h2.Driver
@@ -15,6 +16,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  sql:
+    init:
+      encoding: UTF-8
+      mode: always
+      continue-on-error: true
 
 logging:
   level:
