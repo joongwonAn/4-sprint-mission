@@ -8,6 +8,9 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -27,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,7 +58,7 @@ class MessageServiceTest {
     private BinaryContentStorage binaryContentStorage;
 
     @Test
-    @DisplayName("message 생성 성공")
+    @DisplayName("메시지 생성 성공")
     void message_create_success() {
         // given
         UUID channelId = UUID.randomUUID();
@@ -101,6 +105,7 @@ class MessageServiceTest {
     }
 
     @Test
+    @DisplayName("TODO")
     void message_find_all_by_channel_id_success() {
         // given
         UUID channelId = UUID.randomUUID();
@@ -112,7 +117,7 @@ class MessageServiceTest {
     }
 
     @Test
-    @DisplayName("message 수정 성공")
+    @DisplayName("메시지 수정 성공")
     void message_update_success() {
         // given
         UUID messageId = UUID.randomUUID();
@@ -142,7 +147,7 @@ class MessageServiceTest {
     }
 
     @Test
-    @DisplayName("message 삭제 성공")
+    @DisplayName("메시지 삭제 성공")
     void message_delete_success() {
         // given
         UUID messageId = UUID.randomUUID();
@@ -154,5 +159,66 @@ class MessageServiceTest {
         // then
         verify(messageRepository, times(1)).existsById(messageId);
         verify(messageRepository, times(1)).deleteById(messageId);
+    }
+
+    @Test
+    @DisplayName("메시지 생성 시 사용자 조회 실패로 예외 발생")
+    void should_throw_user_not_found_exception_when_message_create() {
+        // given
+        UUID channelId = UUID.randomUUID();
+        UUID authorId = UUID.randomUUID();
+        MessageCreateRequest request = new MessageCreateRequest(
+                "content",
+                channelId,
+                authorId
+        );
+        List<BinaryContentCreateRequest> binaryContentCreateRequests = List.of(
+                new BinaryContentCreateRequest("fileName1", "contentType1", new byte[0]),
+                new BinaryContentCreateRequest("fileName2", "contentType2", new byte[0])
+        );
+
+        when(channelRepository.findById(channelId)).thenReturn(Optional.of(mock(Channel.class)));
+        when(userRepository.findById(authorId))
+                .thenThrow(new UserNotFoundException(Map.of("authorId", request.authorId())));
+
+        // when & then
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, () -> messageService.create(request, binaryContentCreateRequests));
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+        verify(channelRepository, times(1)).findById(channelId);
+        verify(userRepository, times(1)).findById(authorId);
+    }
+
+    @Test
+    @DisplayName("TODO")
+    void message_find_all_by_channel_id_fail() {
+    }
+
+    @Test
+    @DisplayName("메시지 업데이트 시 메시지 조회 실패로 예외 발생")
+    void should_throw_message_not_found_exception_when_message_update() {
+        // given
+        UUID messageId = UUID.randomUUID();
+        MessageUpdateRequest request = new MessageUpdateRequest("newContent");
+        when(messageRepository.findById(messageId))
+                .thenThrow(new MessageNotFoundException(Map.of("messageId", messageId)));
+
+        // when & then
+        MessageNotFoundException exception = assertThrows(MessageNotFoundException.class, () -> messageService.update(messageId, request));
+        assertEquals(ErrorCode.MESSAGE_NOT_FOUND, exception.getErrorCode());
+        verify(messageRepository, times(1)).findById(messageId);
+    }
+
+    @Test
+    @DisplayName("메시지 삭제 시 메시지 조회 실패로 예외 발생")
+    void should_throw_message_not_found_exception_when_message_delete() {
+        // given
+        UUID messageId = UUID.randomUUID();
+        when(messageRepository.existsById(messageId))
+                .thenThrow(new MessageNotFoundException(Map.of("messageId", messageId)));
+
+        // when & then
+        MessageNotFoundException exception = assertThrows(MessageNotFoundException.class, () -> messageService.delete(messageId));
+        assertEquals(ErrorCode.MESSAGE_NOT_FOUND, exception.getErrorCode());
+        verify(messageRepository, times(1)).existsById(messageId);
     }
 }
