@@ -32,13 +32,6 @@ class MessageRepositoryTest {
     @Autowired
     private ChannelRepository channelRepository;
 
-    @BeforeEach
-    void setUp() {
-        userRepository.deleteAll();
-        channelRepository.deleteAll();
-        messageRepository.deleteAll();
-    }
-
     @Test
     @DisplayName("존재하지 않는 채널 id -> 빈 slice 반환")
     void findAllByChannelIdWithAuthor_returnEmptySlice() {

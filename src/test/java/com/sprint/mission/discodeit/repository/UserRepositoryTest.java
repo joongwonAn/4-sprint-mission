@@ -25,12 +25,6 @@ class UserRepositoryTest {
     @Autowired
     private UserStatusRepository userStatusRepository;
 
-    @BeforeEach
-    void setUp() {
-        userRepository.deleteAll();
-        userStatusRepository.deleteAll();
-    }
-
     @Test
     @DisplayName("fail: 상태가 없는 사용자는 조회 X")
     void findAllWithProfileAndStatus_whenUserHasNoStatus_thenReturnEmptyList() {

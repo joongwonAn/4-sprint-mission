@@ -23,11 +23,6 @@ class ChannelRepositoryTest {
     @Autowired
     private ChannelRepository channelRepository;
 
-    @BeforeEach
-    void setUp() {
-        channelRepository.deleteAll();
-    }
-
     @Test
     @DisplayName("type과 id 모두 불일치 -> 빈 리스트 반환")
     void findAllByTypeOrIdIn_noMatch_returnEmpty() {
