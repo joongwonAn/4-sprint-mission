@@ -33,7 +33,7 @@ class MessageRepositoryTest {
     private ChannelRepository channelRepository;
 
     @Test
-    @DisplayName("존재하지 않는 채널 id -> 빈 slice 반환")
+    @DisplayName("존재하지 않는 채널 id는 빈 slice 반환")
     void findAllByChannelIdWithAuthorReturnEmptySlice() {
         // given
         UUID channelId = UUID.randomUUID();
@@ -48,7 +48,7 @@ class MessageRepositoryTest {
     }
 
     @Test
-    @DisplayName("채널 id와 생성 시간 이전의 메시지 조회 -> 작성자 상태/프로필 포함 반환")
+    @DisplayName("채널 id와 생성 시간 이전의 메시지 조회는 작성자 상태/프로필 포함 반환")
     void findAllByChannelIdWithAuthorReturnMessage() {
         // given
         Channel channel = channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
@@ -68,7 +68,7 @@ class MessageRepositoryTest {
     }
 
     @Test
-    @DisplayName("채널 id 조회 실패 -> null 반환")
+    @DisplayName("존재하지 않는 채널 id는 마지막 메시지 조회 시 빈 Optional 반환")
     void findLastMessageAtByChannelIdReturnNull() {
         // given
         UUID channelId = UUID.randomUUID();
@@ -81,7 +81,7 @@ class MessageRepositoryTest {
     }
 
     @Test
-    @DisplayName("채널 id로 가장 최신 메시지 조회 -> 성공")
+    @DisplayName("채널 id로 가장 최신 메시지 조회 성공")
     void findLastMessageAtByChannelIdSuccess() {
         // given
         Channel channel = channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));

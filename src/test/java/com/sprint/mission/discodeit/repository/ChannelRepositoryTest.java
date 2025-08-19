@@ -24,7 +24,7 @@ class ChannelRepositoryTest {
     private ChannelRepository channelRepository;
 
     @Test
-    @DisplayName("type과 id 모두 불일치 -> 빈 리스트 반환")
+    @DisplayName("type과 id 모두 불일치 시 빈 리스트 반환")
     void findAllByTypeOrIdInNoMatchReturnEmpty() {
         // given
         channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
@@ -38,7 +38,7 @@ class ChannelRepositoryTest {
     }
 
     @Test
-    @DisplayName("type과 id 모두 만족 -> 채널 반환")
+    @DisplayName("type과 id 모두 만족 시 채널 반환")
     void findAllByTypeOrIdInAllMatchReturnChannel() {
         // given
         Channel channel = channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
@@ -52,7 +52,7 @@ class ChannelRepositoryTest {
     }
 
     @Test
-    @DisplayName("type만 만족 -> 채널 반환")
+    @DisplayName("type만 일치 시 채널 반환")
     void findAllByTypeOrIdInTypeMatchReturnChannel() {
         // given
         channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
