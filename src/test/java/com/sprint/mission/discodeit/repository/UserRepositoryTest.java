@@ -27,7 +27,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("fail: 상태가 없는 사용자는 조회 X")
-    void findAllWithProfileAndStatus_whenUserHasNoStatus_thenReturnEmptyList() {
+    void findAllWithProfileAndStatusWhenUserHasNoStatusThenReturnEmptyList() {
         // given
         User user = new User(
                 "usename",
@@ -46,7 +46,7 @@ class UserRepositoryTest {
 
     @Test
     @DisplayName("success: 상태있는 사용자는 조회 O")
-    void findAllWithProfileAndStatus_whenUserHasStatus_thenReturnUserList() {
+    void findAllWithProfileAndStatusWhenUserHasStatusThenReturnUserList() {
         // given
         User user = new User(
                 "usename",

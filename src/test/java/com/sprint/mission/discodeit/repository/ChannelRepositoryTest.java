@@ -25,7 +25,7 @@ class ChannelRepositoryTest {
 
     @Test
     @DisplayName("type과 id 모두 불일치 -> 빈 리스트 반환")
-    void findAllByTypeOrIdIn_noMatch_returnEmpty() {
+    void findAllByTypeOrIdInNoMatchReturnEmpty() {
         // given
         channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
         List<UUID> ids = List.of(UUID.randomUUID());
@@ -39,7 +39,7 @@ class ChannelRepositoryTest {
 
     @Test
     @DisplayName("type과 id 모두 만족 -> 채널 반환")
-    void findAllByTypeOrIdIn_allMatch_returnChannel() {
+    void findAllByTypeOrIdInAllMatchReturnChannel() {
         // given
         Channel channel = channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
         List<UUID> ids = List.of(channel.getId());
@@ -53,7 +53,7 @@ class ChannelRepositoryTest {
 
     @Test
     @DisplayName("type만 만족 -> 채널 반환")
-    void findAllByTypeOrIdIn_typeMatch_returnChannel() {
+    void findAllByTypeOrIdInTypeMatchReturnChannel() {
         // given
         channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
         List<UUID> ids = List.of(UUID.randomUUID());

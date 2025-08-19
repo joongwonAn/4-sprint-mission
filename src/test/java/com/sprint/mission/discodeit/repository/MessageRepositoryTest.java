@@ -34,7 +34,7 @@ class MessageRepositoryTest {
 
     @Test
     @DisplayName("존재하지 않는 채널 id -> 빈 slice 반환")
-    void findAllByChannelIdWithAuthor_returnEmptySlice() {
+    void findAllByChannelIdWithAuthorReturnEmptySlice() {
         // given
         UUID channelId = UUID.randomUUID();
         Instant createdAt = Instant.now().plusSeconds(10);
@@ -49,7 +49,7 @@ class MessageRepositoryTest {
 
     @Test
     @DisplayName("채널 id와 생성 시간 이전의 메시지 조회 -> 작성자 상태/프로필 포함 반환")
-    void findAllByChannelIdWithAuthor_returnMessage() {
+    void findAllByChannelIdWithAuthorReturnMessage() {
         // given
         Channel channel = channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
         User author = userRepository.save(new User("username", "email@codeit.com", "password", null));
@@ -69,7 +69,7 @@ class MessageRepositoryTest {
 
     @Test
     @DisplayName("채널 id 조회 실패 -> null 반환")
-    void findLastMessageAtByChannelId_returnNull() {
+    void findLastMessageAtByChannelIdReturnNull() {
         // given
         UUID channelId = UUID.randomUUID();
 
@@ -82,7 +82,7 @@ class MessageRepositoryTest {
 
     @Test
     @DisplayName("채널 id로 가장 최신 메시지 조회 -> 성공")
-    void findLastMessageAtByChannelId_success() {
+    void findLastMessageAtByChannelIdSuccess() {
         // given
         Channel channel = channelRepository.save(new Channel(ChannelType.PUBLIC, "name", "description"));
         User author = userRepository.save(new User("username", "email@codeit.com", "password", null));
