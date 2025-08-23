@@ -2,9 +2,10 @@ package com.sprint.mission.discodeit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.dto.data.UserDto;
+import com.sprint.mission.discodeit.dto.data.UserStatusDto;
 import com.sprint.mission.discodeit.dto.request.UserCreateRequest;
+import com.sprint.mission.discodeit.dto.request.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.dto.request.UserUpdateRequest;
-import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.GlobalExceptionHandler;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.service.UserService;
@@ -21,6 +22,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,8 +30,8 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -160,12 +162,59 @@ class UserControllerTest {
         ResultActions actions = mvc.perform(
                 multipart("/api/users/{userId}", wrongUserId)
                         .file(userPart)
-                        .with(req -> { req.setMethod("PATCH"); return req; })
+                        .with(req -> {
+                            req.setMethod("PATCH");
+                            return req;
+                        })
                         .contentType(MediaType.MULTIPART_FORM_DATA)
                         .accept(MediaType.APPLICATION_JSON)
         );
 
         // then
         actions.andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("userId로 userStatus 업데이트 성공 - 200 OK, 업데이트된 유저 정보 반환")
+    void updateUserStatusSuccess() throws Exception {
+        // given
+        UUID userId = UUID.randomUUID();
+        UserStatusUpdateRequest request = new UserStatusUpdateRequest(Instant.now());
+        UserStatusDto userStatusDto = new UserStatusDto(UUID.randomUUID(), userId, Instant.now());
+
+        given(userStatusService.updateByUserId(eq(userId), any(UserStatusUpdateRequest.class)))
+                .willReturn(userStatusDto);
+
+        // when
+        ResultActions actions = mvc.perform(
+                patch("/api/users/{userId}/userStatus", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        actions.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(userStatusDto.id().toString()))
+                .andExpect(jsonPath("$.userId").value(userStatusDto.userId().toString()));
+    }
+
+    @Test
+    @DisplayName("userStatus 업데이트 실패  -  요청 바디가 없어서 400")
+    void updateUserStatusFailCausedByEmptyBody() throws Exception {
+        // given
+        UUID userId = UUID.randomUUID();
+
+        // when
+        ResultActions actions = mvc.perform(
+                patch("/api/users/{userId}/userStatus", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("")
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // thwn
+        actions.andExpect(status().is5xxServerError());
     }
 }
