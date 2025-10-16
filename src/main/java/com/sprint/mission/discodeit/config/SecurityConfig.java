@@ -1,10 +1,10 @@
 package com.sprint.mission.discodeit.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sprint.mission.discodeit.auth.handler.JwtLoginSuccessHandler;
+import com.sprint.mission.discodeit.security.handler.JwtLoginSuccessHandler;
 import com.sprint.mission.discodeit.entity.Role;
-import com.sprint.mission.discodeit.security.Http403ForbiddenAccessDeniedHandler;
-import com.sprint.mission.discodeit.security.LoginFailureHandler;
+import com.sprint.mission.discodeit.security.handler.Http403ForbiddenAccessDeniedHandler;
+import com.sprint.mission.discodeit.security.handler.LoginFailureHandler;
 import com.sprint.mission.discodeit.security.SpaCsrfTokenRequestHandler;
 
 import java.util.List;

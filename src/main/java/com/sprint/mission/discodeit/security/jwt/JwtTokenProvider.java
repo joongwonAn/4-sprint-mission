@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.auth.jwt;
+package com.sprint.mission.discodeit.security.jwt;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
