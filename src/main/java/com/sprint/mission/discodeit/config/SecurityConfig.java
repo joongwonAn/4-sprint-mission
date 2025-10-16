@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sprint.mission.discodeit.security.filter.JwtAuthenticationFilter;
 import com.sprint.mission.discodeit.security.handler.JwtLoginSuccessHandler;
 import com.sprint.mission.discodeit.entity.Role;
 import com.sprint.mission.discodeit.security.handler.Http403ForbiddenAccessDeniedHandler;
@@ -31,6 +32,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -48,7 +50,8 @@ public class SecurityConfig {
             HttpSecurity http,
             JwtLoginSuccessHandler jwtLoginSuccessHandler,
             LoginFailureHandler loginFailureHandler,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            JwtAuthenticationFilter jwtAuthenticationFilter
     )
             throws Exception {
         http
@@ -61,6 +64,7 @@ public class SecurityConfig {
                         .successHandler(jwtLoginSuccessHandler)
                         .failureHandler(loginFailureHandler)
                 )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler(
