@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sprint.mission.discodeit.entity.RefreshToken;
 import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
 import com.sprint.mission.discodeit.dto.data.JwtDto;
 import com.sprint.mission.discodeit.dto.data.UserDto;
@@ -9,6 +10,7 @@ import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.security.DiscodeitUserDetails;
+import com.sprint.mission.discodeit.service.basic.RefreshTokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +41,7 @@ import java.util.UUID;
 public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
     private final ObjectMapper objectMapper;
 
     private final UserRepository userRepository;
@@ -61,9 +64,9 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // token 발급
         String accessToken = jwtTokenProvider.generateAccessToken(claims);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(userId.toString());
+        RefreshToken refreshToken = refreshTokenService.saveRefreshToken(userId);
 
-        Cookie refreshTokenCookie = new Cookie("REFRESH_TOKEN", refreshToken);
+        Cookie refreshTokenCookie = new Cookie("REFRESH_TOKEN", refreshToken.getToken());
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
