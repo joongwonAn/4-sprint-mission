@@ -103,7 +103,7 @@ public class JwtTokenProvider {
 
             Map<String, Object> claims = Map.of(
                     "userId", userId,
-                    "roels", user.getRole().name()
+                    "roles", user.getRole().name()
             );
 
             log.info("# Renew Access Token, userId = {}, refresh token = {}", userId, refreshToken);
