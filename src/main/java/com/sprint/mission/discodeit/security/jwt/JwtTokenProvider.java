@@ -134,4 +134,14 @@ public class JwtTokenProvider {
             throw new RuntimeException("JWT Claims 추출 실패", e);
         }
     }
+
+    public boolean isTokenExpired(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            Date exp = signedJWT.getJWTClaimsSet().getExpirationTime();
+            return exp != null && exp.before(new Date());
+        } catch (Exception e) {
+            return false; // 파싱 자체가 안되면 false로 두고 validateToken()에서 걸리게 함
+        }
+    }
 }

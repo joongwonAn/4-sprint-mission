@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.security.filter.JwtAuthenticationFilter;
 import com.sprint.mission.discodeit.security.handler.JwtLoginSuccessHandler;
 import com.sprint.mission.discodeit.entity.Role;
 import com.sprint.mission.discodeit.security.handler.Http403ForbiddenAccessDeniedHandler;
+import com.sprint.mission.discodeit.security.handler.JwtLogoutHandler;
 import com.sprint.mission.discodeit.security.handler.LoginFailureHandler;
 import com.sprint.mission.discodeit.security.SpaCsrfTokenRequestHandler;
 
@@ -16,7 +17,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -33,7 +33,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -50,6 +49,7 @@ public class SecurityConfig {
             HttpSecurity http,
             JwtLoginSuccessHandler jwtLoginSuccessHandler,
             LoginFailureHandler loginFailureHandler,
+            JwtLogoutHandler jwtLogoutHandler,
             ObjectMapper objectMapper,
             JwtAuthenticationFilter jwtAuthenticationFilter
     )
@@ -67,16 +67,15 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
-                        .logoutSuccessHandler(
-                                new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT))
+                        .addLogoutHandler(jwtLogoutHandler)
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/auth/csrf-token"),
+                                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/refresh"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/users"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/login"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/logout"),
-                                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/auth/refresh"),
                                 new NegatedRequestMatcher(AntPathRequestMatcher.antMatcher("/api/**"))
                         ).permitAll()
                         .anyRequest().authenticated()

@@ -4,11 +4,13 @@ import com.sprint.mission.discodeit.controller.api.AuthApi;
 import com.sprint.mission.discodeit.dto.data.JwtDto;
 import com.sprint.mission.discodeit.dto.data.UserDto;
 import com.sprint.mission.discodeit.dto.request.RoleUpdateRequest;
+import com.sprint.mission.discodeit.exception.security.SecurityNotFoundException;
 import com.sprint.mission.discodeit.security.DiscodeitUserDetails;
 import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
 import com.sprint.mission.discodeit.service.AuthService;
 import com.sprint.mission.discodeit.service.UserService;
 
+import java.util.Map;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -63,17 +65,22 @@ public class AuthController implements AuthApi {
     public ResponseEntity<?> renewAccessTokenFromRefreshToken(@CookieValue("REFRESH_TOKEN") String refreshTokenValue) {
         log.info("# Access Token 재발급 요청");
 
-        if (!refreshTokenValue.isEmpty() || jwtTokenProvider.validateToken(refreshTokenValue)) {
-            JwtDto jwtDto = authService.renewToken(refreshTokenValue);
-            log.debug("# Access Token 재발급 성공");
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(jwtDto);
-        } else {
-            log.error("# Access Token 재발급 실패");
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .build();
+        if (refreshTokenValue == null || refreshTokenValue.isBlank()) {
+            log.warn("# Refresh Token 누락");
+            throw SecurityNotFoundException.withRefreshToken(refreshTokenValue);
         }
+
+        if (!jwtTokenProvider.validateToken(refreshTokenValue)) {
+            log.warn("# Refresh Token 검증 실패: {}", refreshTokenValue);
+            throw SecurityNotFoundException.withRefreshToken(refreshTokenValue);
+        }
+
+
+        JwtDto jwtDto = authService.renewToken(refreshTokenValue);
+        log.info("# Access Token 재발급 성공 for RefreshToken={}", refreshTokenValue);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(jwtDto);
     }
 }

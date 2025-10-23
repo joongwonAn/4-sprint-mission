@@ -62,15 +62,11 @@ public class BasicAuthService implements AuthService {
     @Transactional
     public JwtDto renewToken(String refreshTokenValue) {
         if (!jwtTokenProvider.validateToken(refreshTokenValue)) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new RuntimeException("# Invalid refresh token");
         }
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(refreshTokenValue)
-                .orElseThrow(() -> new RuntimeException("등록되지 않은 리프레시 토큰"));
-
-        if (refreshToken.getRotated()) {
-            throw new RuntimeException("이미 사용된 리프레시 토큰");
-        }
+                .orElseThrow(() -> new RuntimeException("# 등록되지 않은 리프레시 토큰"));
 
         Map<String, Object> claims = jwtTokenProvider.getClaims(refreshTokenValue);
         UUID userId = UUID.fromString(claims.get("sub").toString());
@@ -78,13 +74,26 @@ public class BasicAuthService implements AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> UserNotFoundException.withId(userId));
 
+        if (refreshToken.getRotated()) {
+            log.debug("# 이미 사용된 리프래시 토큰, 재발급 요청");
+            String newAccessToken = jwtTokenProvider.renewAccessToken(refreshToken.getToken());
+
+            refreshToken.invalidate();
+            refreshTokenRepository.save(refreshToken);
+            RefreshToken newRefreshToken = refreshTokenService.saveRefreshToken(userId);
+            log.info("# Refresh Token과 Access Token 재발급 완료, refreshToken = {}, accessToken = {}", newRefreshToken.getToken(), newAccessToken.getBytes());
+
+            return new JwtDto(userMapper.toDto(user), newAccessToken);
+        }
+
+
         String newAccessToken = jwtTokenProvider.renewAccessToken(refreshToken.getToken());
+
         refreshToken.invalidate();
         refreshTokenRepository.save(refreshToken);
-
         RefreshToken newRefreshToken = refreshTokenService.saveRefreshToken(userId);
 
-        log.info("# Refresh Token과 Access Token 재발급 완료, refreshToken = {}, accessToken = {}", newRefreshToken, newAccessToken);
+        log.info("# Refresh Token과 Access Token 재발급 완료, refreshToken = {}, accessToken = {}", newRefreshToken.getToken(), newAccessToken.getBytes());
         return new JwtDto(userMapper.toDto(user), newAccessToken);
     }
 }
