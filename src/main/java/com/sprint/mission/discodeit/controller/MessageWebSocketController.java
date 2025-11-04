@@ -14,10 +14,10 @@ import org.springframework.stereotype.Controller;
 public class MessageWebSocketController {
     private final MessageService messageService;
 
-    @MessageMapping("/message") // STOMP의 /pub/message 요청 처리
+    @MessageMapping("/messages") // STOMP의 /pub/messages 요청 처리
     public void handleMessage(MessageCreateRequest request) {
         log.info("# 첨부 파일 없는 메시지 생성 요청: request={}", request);
-        MessageDto createdMessage = messageService.create(request, null);
+        MessageDto createdMessage = messageService.create(request);
         log.debug("# 첨부 파일 없는 메시지 생성 응답: {}", createdMessage);
     }
 }
