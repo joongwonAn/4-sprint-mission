@@ -48,6 +48,29 @@ public class BasicMessageService implements MessageService {
 
     @Transactional
     @Override
+    public MessageDto create(MessageCreateRequest request) {
+        log.debug("# 첨부 파일 없는 메시지 생성 시작: request={}", request);
+        Channel channel = channelRepository.findById(request.channelId())
+                .orElseThrow(() -> ChannelNotFoundException.withId(request.channelId()));
+        User author = userRepository.findById(request.authorId())
+                .orElseThrow(() -> UserNotFoundException.withId(request.authorId()));
+
+        Message message = new Message(
+                request.content(),
+                channel,
+                author,
+                null
+        );
+        messageRepository.save(message);
+        MessageDto messageDto = messageMapper.toDto(message);
+        publisher.publishEvent(new MessageCreatedEvent(messageDto.id(), request.channelId(), request.authorId(), request.content()));
+        log.info("# 첨부 파일 없는 메시지 생성 완료: id={}, channelId={}", message.getId(), request.channelId());
+
+        return messageDto;
+    }
+
+    @Transactional
+    @Override
     public MessageDto create(MessageCreateRequest messageCreateRequest,
                              List<BinaryContentCreateRequest> binaryContentCreateRequests) {
         log.debug("# 메시지 생성 시작: request={}", messageCreateRequest);
@@ -87,10 +110,11 @@ public class BasicMessageService implements MessageService {
         );
 
         messageRepository.save(message);
-        publisher.publishEvent(new MessageCreatedEvent(channelId, authorId, content));
+        MessageDto messageDto = messageMapper.toDto(message);
+        publisher.publishEvent(new MessageCreatedEvent(messageDto.id(), channelId, authorId, content));
 
         log.info("# 메시지 생성 완료: id={}, channelId={}", message.getId(), channelId);
-        return messageMapper.toDto(message);
+        return messageDto;
     }
 
     @Transactional(readOnly = true)

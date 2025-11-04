@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface MessageService {
 
+  MessageDto create(MessageCreateRequest request);
+
   MessageDto create(MessageCreateRequest messageCreateRequest,
       List<BinaryContentCreateRequest> binaryContentCreateRequests);
 
