@@ -2,16 +2,19 @@ package com.sprint.mission.discodeit.event.listener;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sprint.mission.discodeit.dto.data.NotificationDto;
 import com.sprint.mission.discodeit.entity.*;
 import com.sprint.mission.discodeit.event.BinaryContentSaveFailEvent;
 import com.sprint.mission.discodeit.event.MessageCreatedEvent;
 import com.sprint.mission.discodeit.event.RoleUpdatedEvent;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
+import com.sprint.mission.discodeit.mapper.NotificationMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.NotificationRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.service.SseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -30,6 +33,8 @@ public class NotificationRequiredTopicListener {
     private final ChannelRepository channelRepository;
     private final ReadStatusRepository readStatusRepository;
     private final NotificationRepository notificationRepository;
+    private final SseService sseService;
+    private final NotificationMapper notificationMapper;
 
     @KafkaListener(topics = "discodeit.MessageCreatedEvent")
     public void onMessageCreatedEvent(String kafkaEvent) {
@@ -48,11 +53,25 @@ public class NotificationRequiredTopicListener {
                     .filter(user -> !user.getId().equals(event.userId()))
                     .toList();
 
-            for (User receiver : receivers) {
+            /*for (User receiver : receivers) {
                 Notification notification = new Notification(receiver, sender, channel, event.content());
                 notificationRepository.save(notification);
-            }
-            log.info("### Kafka MessageCreatedEvent Notification 성공");
+            }*/
+
+            List<NotificationDto> dtos = receivers.stream()
+                    .map(receiver -> {
+                        Notification notification = new Notification(receiver, sender, channel, event.content());
+                        Notification saved = notificationRepository.save(notification);
+                        return notificationMapper.toDto(saved);
+                    }).toList();
+
+            // 저장 후 SSE 전송
+            sseService.send(
+                    receivers.stream().map(User::getId).toList(),
+                    "MessageCreatedEvent", // TODO: 이벤트 네임은? 내맘대루?
+                    dtos
+            );
+            log.info("### Kafka MessageCreatedEvent Notification & SSE 성공");
         } catch (JsonProcessingException e) {
             log.error("### Kafka MessageCreatedEvent Notification 실패");
             throw new RuntimeException(e);
