@@ -11,6 +11,7 @@ import com.nimbusds.jose.JOSEException;
 import com.sprint.mission.discodeit.dto.data.UserDto;
 import com.sprint.mission.discodeit.entity.Role;
 import com.sprint.mission.discodeit.security.DiscodeitUserDetails;
+import com.sprint.mission.discodeit.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -46,12 +47,13 @@ class JwtLoginSuccessHandlerTest {
   private JwtLoginSuccessHandler jwtLoginSuccessHandler;
   private ObjectMapper objectMapper;
   private DiscodeitUserDetails userDetails;
+  private UserService userService;
 
   @BeforeEach
   void setUp() {
     objectMapper = new ObjectMapper();
     objectMapper.registerModule(new JavaTimeModule());
-    jwtLoginSuccessHandler = new JwtLoginSuccessHandler(objectMapper, tokenProvider, jwtRegistry);
+    jwtLoginSuccessHandler = new JwtLoginSuccessHandler(objectMapper, tokenProvider, jwtRegistry, userService);
 
     UUID userId = UUID.randomUUID();
     UserDto userDto = new UserDto(

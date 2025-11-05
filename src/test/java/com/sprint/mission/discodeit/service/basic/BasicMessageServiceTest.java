@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import static com.sprint.mission.discodeit.entity.BinaryContentStatus.PROCESSING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +42,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.SliceImpl;
@@ -73,6 +75,9 @@ class BasicMessageServiceTest {
   @InjectMocks
   private BasicMessageService messageService;
 
+  @Mock
+  private ApplicationEventPublisher publisher;
+
   private UUID messageId;
   private UUID channelId;
   private UUID authorId;
@@ -97,9 +102,9 @@ class BasicMessageServiceTest {
     author = new User("testUser", "test@example.com", "password", null);
     ReflectionTestUtils.setField(author, "id", authorId);
 
-    attachment = new BinaryContent("test.txt", 100L, "text/plain");
+    attachment = new BinaryContent("test.txt", 100L, "text/plain", PROCESSING);
     ReflectionTestUtils.setField(attachment, "id", UUID.randomUUID());
-    attachmentDto = new BinaryContentDto(attachment.getId(), "test.txt", 100L, "text/plain");
+    attachmentDto = new BinaryContentDto(attachment.getId(), "test.txt", 100L, "text/plain", PROCESSING);
 
     message = new Message(content, channel, author, List.of(attachment));
     ReflectionTestUtils.setField(message, "id", messageId);
@@ -113,6 +118,25 @@ class BasicMessageServiceTest {
         new UserDto(authorId, "testUser", "test@example.com", null, true, Role.USER),
         List.of(attachmentDto)
     );
+  }
+
+  @Test
+  @DisplayName("첨부 파일 없는 메시지 생성 성공")
+  void SuccessCreateMessageWithoutAttachments() {
+    // given
+    MessageCreateRequest request = new MessageCreateRequest(content, channelId, authorId);
+
+    given(channelRepository.findById(eq(channelId))).willReturn(Optional.of(channel));
+    given(userRepository.findById(eq(authorId))).willReturn(Optional.of(author));
+    given(messageRepository.save(any(Message.class))).willReturn(message);
+    given(messageMapper.toDto(any(Message.class))).willReturn(messageDto);
+
+    // when
+    MessageDto result = messageService.create(request);
+
+    // then
+    assertThat(result).isEqualTo(messageDto);
+    verify(messageRepository).save(any(Message.class));
   }
 
   @Test
