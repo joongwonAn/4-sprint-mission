@@ -1,9 +1,7 @@
 package com.sprint.mission.discodeit.event.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sprint.mission.discodeit.event.BinaryContentSaveFailEvent;
-import com.sprint.mission.discodeit.event.MessageCreatedEvent;
-import com.sprint.mission.discodeit.event.RoleUpdatedEvent;
+import com.sprint.mission.discodeit.event.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -48,6 +46,13 @@ public class KafkaProduceRequiredEventListener {
     public void on(BinaryContentSaveFailEvent event) {
         log.debug("### Kafka BinaryContentSaveFailEvent Listener 시작");
         sendEvent("discodeit.BinaryContentSaveFailEvent", event);
+    }
+
+    @Async("eventTaskExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void on(ChannelUpdateEvent event) {
+        log.debug("### Kafka ChannelUpdateEvent Listener 시작");
+        sendEvent("discodeit.ChannelUpdateEvent", event);
     }
 
     private void sendEvent(String topic, Object event) {
