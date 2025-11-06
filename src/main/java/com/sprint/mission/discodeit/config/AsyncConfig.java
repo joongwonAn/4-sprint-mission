@@ -24,17 +24,4 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
-
-    @Bean(name = "eventTaskExecutor")
-    public Executor EventTaskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(50);
-        executor.setThreadNamePrefix("EventTaskExecutor-");
-
-        executor.setTaskDecorator(new MdcTaskDecorator());
-        executor.initialize();
-        return executor;
-    }
 }

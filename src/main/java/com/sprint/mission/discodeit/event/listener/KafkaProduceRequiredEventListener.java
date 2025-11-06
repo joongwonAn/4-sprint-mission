@@ -26,7 +26,7 @@ public class KafkaProduceRequiredEventListener {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    @Async("eventTaskExecutor")
+    @Async("taskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) // 메시지 저장 성공 시 kafka 발행
     public void on(MessageCreatedEvent event) {
         log.debug("### Kafka MessageCreatedEvent Listener 시작");
@@ -34,28 +34,28 @@ public class KafkaProduceRequiredEventListener {
 
     }
 
-    @Async("eventTaskExecutor")
+    @Async("taskExecutor")
     @TransactionalEventListener
     public void on(RoleUpdatedEvent event) {
         log.debug("### Kafka RoleUpdatedEvent Listener 시작");
         sendEvent("discodeit.RoleUpdatedEvent", event);
     }
 
-    @Async("eventTaskExecutor")
+    @Async("taskExecutor")
     @EventListener
     public void on(BinaryContentSaveFailEvent event) {
         log.debug("### Kafka BinaryContentSaveFailEvent Listener 시작");
         sendEvent("discodeit.BinaryContentSaveFailEvent", event);
     }
 
-    @Async("eventTaskExecutor")
+    @Async("taskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(ChannelUpdateEvent event) {
         log.debug("### Kafka ChannelUpdateEvent Listener 시작");
         sendEvent("discodeit.ChannelUpdateEvent", event);
     }
 
-    @Async("eventTaskExecutor")
+    @Async("taskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(UserUpdateEvent event) {
         log.debug("### Kafka UserUpdateEvent Listener 시작");
