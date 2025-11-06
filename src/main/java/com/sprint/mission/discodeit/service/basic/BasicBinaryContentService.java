@@ -13,6 +13,7 @@ import com.sprint.mission.discodeit.service.BinaryContentService;
 import java.util.List;
 import java.util.UUID;
 
+import com.sprint.mission.discodeit.service.SseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -27,6 +28,7 @@ public class BasicBinaryContentService implements BinaryContentService {
     private final BinaryContentRepository binaryContentRepository;
     private final BinaryContentMapper binaryContentMapper;
     private final ApplicationEventPublisher publisher;
+    private final SseService sseService;
 
     @Transactional
     @Override
@@ -91,7 +93,19 @@ public class BasicBinaryContentService implements BinaryContentService {
         BinaryContent binaryContent = binaryContentRepository.findById(binaryContentId)
                 .orElseThrow(() -> BinaryContentNotFoundException.withId(binaryContentId));
         binaryContent.updateStatus(status);
-        binaryContentRepository.save(binaryContent);
+        BinaryContent saved = binaryContentRepository.save(binaryContent);
+        BinaryContentDto binaryContentDto = binaryContentMapper.toDto(saved);
         log.info("# 바이너리 컨텐츠 상태 업데이트 완료: id={}, status={}", binaryContent.getId(), binaryContent.getStatus());
+
+        log.debug("# 파일 상태 변경 SSE 이벤트 전송 시작");
+        try {
+            sseService.broadcast(
+                    "binaryContents.updated",
+                    binaryContentDto
+            );
+            log.info("# 파일 상태 변경 SSE 이벤트 전송 성공");
+        } catch (Exception e) {
+            log.error("# 파일 상태 변경 SSE 이벤트 전송 실패", e);
+        }
     }
 }
