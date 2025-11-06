@@ -8,6 +8,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.BinaryContentStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.event.BinaryContentCreatedEvent;
+import com.sprint.mission.discodeit.event.UserUpdateEvent;
 import com.sprint.mission.discodeit.exception.user.UserAlreadyExistsException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
@@ -86,6 +87,10 @@ public class BasicUserService implements UserService {
 
         userRepository.save(user);
         log.info("사용자 생성 완료: id={}, username={}", user.getId(), username);
+
+        log.debug("# 사용자 갱신 SSE 이벤트 전송(created), payload={}", userMapper.toDto(user));
+        publisher.publishEvent(new UserUpdateEvent(userMapper.toDto(user), "created"));
+
         return userMapper.toDto(user);
     }
 
@@ -165,8 +170,10 @@ public class BasicUserService implements UserService {
         String encodedPassword = Optional.ofNullable(newPassword).map(passwordEncoder::encode)
                 .orElse(user.getPassword());
         user.update(newUsername, newEmail, encodedPassword, nullableProfile);
-
         log.info("사용자 수정 완료: id={}", userId);
+
+        log.debug("# 사용자 갱신 SSE 이벤트 전송(updated), payload={}", userMapper.toDto(user));
+        publisher.publishEvent(new UserUpdateEvent(userMapper.toDto(user), "updated"));
         return userMapper.toDto(user);
     }
 
@@ -180,12 +187,14 @@ public class BasicUserService implements UserService {
     public void delete(UUID userId) {
         log.debug("사용자 삭제 시작: id={}", userId);
 
-        if (!userRepository.existsById(userId)) {
-            throw UserNotFoundException.withId(userId);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> UserNotFoundException.withId(userId));
 
         userRepository.deleteById(userId);
         log.info("사용자 삭제 완료: id={}", userId);
+
+        log.debug("# 사용자 갱신 SSE 이벤트 전송(deleted), payload={}", userMapper.toDto(user));
+        publisher.publishEvent(new UserUpdateEvent(userMapper.toDto(user), "updated"));
     }
 
     @Override
