@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.repository.SseEmitterRepository;
 import com.sprint.mission.discodeit.service.SseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -71,7 +72,7 @@ public class BasicSseService implements SseService {
         Collection<List<SseEmitter>> emitters = emitterRepository.findAllEmitters();
         for (List<SseEmitter> emitter : emitters) {
             for (SseEmitter emitterItem : emitter) {
-                try{
+                try {
                     if (emitterItem != null) {
                         emitterItem.send(SseEmitter.event()
                                 .name(eventName)
@@ -88,8 +89,22 @@ public class BasicSseService implements SseService {
 
     // 주기적으로 ping을 보내서 끊긴 연결 정리
     @Override
+    @Scheduled(fixedDelay = 1000 * 60 * 30) // 30분 주기로 정리 실행
     public void cleanUp() {
-        // 주기적으로 ping을 보내서 만료된 SseEmitter 객체 삭제
+        log.debug("# SseEmitter CleanUP 시작");
+        Collection<List<SseEmitter>> emitters = emitterRepository.findAllEmitters();
+        for (List<SseEmitter> emitterList : emitters) {
+            Iterator<SseEmitter> iterator = emitterList.iterator();
+
+            while (iterator.hasNext()) {
+                SseEmitter emitter = iterator.next();
+
+                if (!ping(emitter)) {
+                    iterator.remove(); // 끊긴 emitter 제거
+                    log.info("# SseEmitter CleanUP, emitter={}", emitter);
+                }
+            }
+        }
     }
 
     private void sendToClient(UUID receiverId, SseEmitter emitter, String eventName, Object data) {
@@ -107,10 +122,17 @@ public class BasicSseService implements SseService {
 
     // emitter가 아직 살아있는지 확인용 더미 이벤트
     private boolean ping(SseEmitter emitter) {
+        log.debug("# SseEmitter ping 시작, emitter={}", emitter);
         try {
-            emitter.send(SseEmitter.event().name("ping").data("keep-alive"));
+            emitter.send(SseEmitter.event()
+                    .name("ping")
+                    .data("keep-alive")
+            );
+            log.info("# SseEmitter ping 성공");
             return true;
         } catch (IOException e) {
+            log.error("# SseEmitter ping error 발생", e);
+            emitter.complete();
             return false;
         }
     }
