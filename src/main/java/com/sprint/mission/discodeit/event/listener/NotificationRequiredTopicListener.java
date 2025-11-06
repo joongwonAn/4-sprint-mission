@@ -53,11 +53,6 @@ public class NotificationRequiredTopicListener {
                     .filter(user -> !user.getId().equals(event.userId()))
                     .toList();
 
-            /*for (User receiver : receivers) {
-                Notification notification = new Notification(receiver, sender, channel, event.content());
-                notificationRepository.save(notification);
-            }*/
-
             List<NotificationDto> dtos = receivers.stream()
                     .map(receiver -> {
                         Notification notification = new Notification(receiver, sender, channel, event.content());
@@ -66,11 +61,14 @@ public class NotificationRequiredTopicListener {
                     }).toList();
 
             // 저장 후 SSE 전송
-            sseService.send(
-                    receivers.stream().map(User::getId).toList(),
-                    "MessageCreatedEvent", // TODO: 이벤트 네임은? 내맘대루?
-                    dtos
-            );
+            for (NotificationDto dto : dtos) {
+                sseService.send(
+                        receivers.stream().map(User::getId).toList(),
+                        "notifications.created",
+                        dto
+                );
+            }
+
             log.info("### Kafka MessageCreatedEvent Notification & SSE 성공");
         } catch (JsonProcessingException e) {
             log.error("### Kafka MessageCreatedEvent Notification 실패");
