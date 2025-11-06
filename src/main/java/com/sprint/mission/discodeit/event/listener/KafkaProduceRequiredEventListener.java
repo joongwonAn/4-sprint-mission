@@ -55,6 +55,13 @@ public class KafkaProduceRequiredEventListener {
         sendEvent("discodeit.ChannelUpdateEvent", event);
     }
 
+    @Async("eventTaskExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void on(UserUpdateEvent event) {
+        log.debug("### Kafka UserUpdateEvent Listener 시작");
+        sendEvent("discodeit.UserUpdateEvent", event);
+    }
+
     private void sendEvent(String topic, Object event) {
         try {
             String payload = objectMapper.writeValueAsString(event);
