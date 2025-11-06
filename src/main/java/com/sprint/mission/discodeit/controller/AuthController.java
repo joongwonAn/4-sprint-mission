@@ -47,7 +47,7 @@ public class AuthController implements AuthApi {
       HttpServletResponse response) {
     log.info("토큰 리프레시 요청");
     JwtInformation jwtInformation = authService.refreshToken(refreshToken);
-    Cookie refreshCookie = jwtTokenProvider.genereateRefreshTokenCookie(
+    Cookie refreshCookie = jwtTokenProvider.generateRefreshTokenCookie(
         jwtInformation.getRefreshToken());
     response.addCookie(refreshCookie);
 
