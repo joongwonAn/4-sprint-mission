@@ -34,7 +34,7 @@ public class ReadStatus extends BaseUpdatableEntity {
     private Channel channel;
     @Column(columnDefinition = "timestamp with time zone", nullable = false)
     private Instant lastReadAt;
-    @Column(nullable = false)
+    @Column(name = "notification_enabled", nullable = false)
     private boolean notificationEnabled;
 
     public ReadStatus(User user, Channel channel, Instant lastReadAt) {

@@ -34,7 +34,7 @@ ENV PROJECT_NAME=discodeit \
 COPY --from=builder /app/build/libs/${PROJECT_NAME}-${PROJECT_VERSION}.jar ./
 
 # 80 포트 노출
-EXPOSE 80
+EXPOSE 8080
 
 # jar 파일 실행
 ENTRYPOINT ["sh", "-c", "java ${JVM_OPTS} -jar ${PROJECT_NAME}-${PROJECT_VERSION}.jar"]

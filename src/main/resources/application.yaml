@@ -17,7 +17,7 @@ spring:
   config:
     import: optional:file:.env[.properties]
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: broker:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -38,7 +38,7 @@ spring:
       - userCacheAll
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:redis}
       port: ${REDIS_PORT:6379}
 
 management:
@@ -84,10 +84,10 @@ discodeit:
       region: ${AWS_S3_REGION}
       bucket: ${AWS_S3_BUCKET}
       presigned-url-expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:600} # (기본값: 10분)
-  admin: # 일단 하드코딩
-    username: admin
-    email: admin@gmail.com
-    password: $2a$10$/p24AqV0Qw0m3Yi5wTFeteLRhRgdymskooFlDqL4TewkqCDGgisda
+  admin:
+    username: ${DISCODEIT_ADMIN_USERNAME:admin}
+    email: ${DISCODEIT_ADMIN_EMAIL:admin@gmail.com}
+    password: ${DISCODEIT_ADMIN_PASSWORD:admin1!}
   jwt:
     access-token:
       secret: your-access-token-secret-key-here-make-it-long-and-random #${JWT_ACCESS_SECRET:your-access-token-secret-key-here-make-it-long-and-random}
